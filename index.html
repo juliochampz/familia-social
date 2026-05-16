@@ -641,17 +641,26 @@ function renderFeed(){
   const feedEl = $('pageFeed');
   if(feedListenerAtivo) return;
   feedListenerAtivo = true;
-  onValue(ref(db,'posts'), snap => {
-    const posts = [];
-    snap.forEach(c => posts.push({id:c.key,...c.val()}));
+  feedEl.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+
+  get(ref(db,'posts')).then(snap=>{
+    const posts=[];
+    snap.forEach(c=>posts.push({id:c.key,...c.val()}));
     posts.sort((a,b)=>(b.ts||0)-(a.ts||0));
-    if(!posts.length){
-      feedEl.innerHTML=`<div class="empty"><div class="empty-icon">🦫</div><p>Nenhuma publicação ainda.<br>Seja o primeiro a compartilhar!</p></div>`;
-      return;
-    }
-    const scrollY = window.scrollY;
-    feedEl.innerHTML = posts.map(p => renderPost(p)).join('');
-    window.scrollTo(0, scrollY);
+    feedEl.innerHTML=posts.length
+      ? posts.map(p=>renderPost(p)).join('')
+      : `<div class="empty"><div class="empty-icon">🦫</div><p>Nenhuma publicação ainda.<br>Seja o primeiro a compartilhar!</p></div>`;
+
+    // Agora ativa o listener em tempo real para novos posts
+    onValue(ref(db,'posts'), snap2=>{
+      const posts2=[];
+      snap2.forEach(c=>posts2.push({id:c.key,...c.val()}));
+      posts2.sort((a,b)=>(b.ts||0)-(a.ts||0));
+      if(posts2.length) feedEl.innerHTML=posts2.map(p=>renderPost(p)).join('');
+    });
+  }).catch(err=>{
+    console.error('Erro feed:', err);
+    feedEl.innerHTML='<div class="empty">Erro ao carregar posts.</div>';
   });
 }
 
