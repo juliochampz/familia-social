@@ -183,6 +183,10 @@ textarea:focus{outline:none;border-color:var(--accent)}
 
 /* ── LOADING ────────────────────────────────────────── */
 .loading{text-align:center;padding:40px;color:var(--gray)}
+.photos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:12px;width:100%;max-width:500px}
+.photo-thumb{width:100%;aspect-ratio:1/1;overflow:hidden;cursor:pointer;background:var(--warm);position:relative}
+.photo-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.photos-empty{text-align:center;padding:24px 0;color:var(--gray);font-size:13px;grid-column:1/-1}
 .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);
   border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -372,17 +376,6 @@ textarea:focus{outline:none;border-color:var(--accent)}
   </div>
 </div>
 
-<!-- MODAL QUEM REAGIU -->
-<div class="reac-modal" id="reacModal" onclick="if(event.target===this)fecharReacModal()">
-  <div class="reac-box">
-    <div class="reac-box-hdr">
-      <h4 id="reacModalTitulo">Reações</h4>
-      <button onclick="fecharReacModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--gray)">✕</button>
-    </div>
-    <div id="reacModalLista"></div>
-  </div>
-</div>
-
 <!-- MODAL NOVO POST -->
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)fecharModal()">
   <div class="modal">
@@ -511,7 +504,7 @@ function renderReacoesBar(p){
   Object.values(p.reacoes).forEach(r=>{ counts[r.emoji]=(counts[r.emoji]||0)+1; });
   const minhaReacao=p.reacoes[user?.uid]?.emoji;
   return Object.entries(counts).map(([emoji,n])=>
-    `<span class="reacao-count${emoji===minhaReacao?' minha':''}" onclick="verReacoes('${p.id}','${emoji}')" title="Ver quem reagiu">${emoji} ${n}</span>`
+    `<span class="reacao-count${emoji===minhaReacao?' minha':''}" onclick="reagir('${p.id}','${emoji}')">${emoji} ${n}</span>`
   ).join('');
 }
 
@@ -653,7 +646,10 @@ function renderFeed(){
       feedEl.innerHTML=`<div class="empty"><div class="empty-icon">🦫</div><p>Nenhuma publicação ainda.<br>Seja o primeiro a compartilhar!</p></div>`;
       return;
     }
+    // Manter scroll position
+    const scrollY = window.scrollY;
     feedEl.innerHTML = posts.map(p => renderPost(p)).join('');
+    window.scrollTo(0, scrollY);
   });
 }
 
