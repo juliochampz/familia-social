@@ -21,8 +21,6 @@
   --card:#FFFCF9;--overlay:rgba(61,43,31,.6);
 }
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--brown);min-height:100vh;overflow-x:hidden}
-
-/* ── AUTH ─────────────────────────────────────────── */
 #authScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
   background:linear-gradient(145deg,#3D2B1F 0%,#6B4C3B 50%,#C8763A 100%)}
 .auth-card{background:var(--white);border-radius:24px;padding:40px 32px;width:100%;max-width:400px;
@@ -47,11 +45,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--brown)
 .auth-note{font-size:11px;color:var(--gray);text-align:center;margin-top:12px;line-height:1.5}
 .auth-err{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 12px;
   font-size:13px;color:var(--red);margin-bottom:14px;display:none}
-
-/* ── APP ─────────────────────────────────────────── */
 #app{display:none;min-height:100vh;padding-bottom:70px}
-
-/* TopBar */
 .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:12px 18px;
   display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
 .topbar-title{font-family:'Playfair Display',serif;font-size:20px;color:var(--brown);font-weight:700}
@@ -60,8 +54,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--brown)
   display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;
   cursor:pointer;overflow:hidden;flex-shrink:0}
 .avatar-sm img{width:100%;height:100%;object-fit:cover}
-
-/* Bottom Nav */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--border);
   display:grid;grid-template-columns:repeat(3,1fr);z-index:100;padding-bottom:env(safe-area-inset-bottom)}
 .nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -69,11 +61,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--brown)
   font-weight:500;gap:3px;transition:color .2s;font-family:'DM Sans',sans-serif}
 .nav-item.active{color:var(--accent)}
 .nav-item svg{width:22px;height:22px}
-
-/* ── FEED ─────────────────────────────────────────── */
 .feed{padding:12px 16px;max-width:500px;margin:0 auto}
-
-/* Post card */
 .post-card{background:var(--card);border-radius:20px;overflow:hidden;margin-bottom:16px;
   box-shadow:0 2px 12px var(--shadow);border:1px solid var(--border)}
 .post-header{display:flex;align-items:center;gap:10px;padding:12px 14px}
@@ -85,8 +73,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--brown)
 .post-name{font-size:14px;font-weight:600;color:var(--brown)}
 .post-time{font-size:11px;color:var(--gray);margin-top:1px}
 .post-img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:#f0e8e0}
-.post-img-placeholder{width:100%;aspect-ratio:4/3;background:linear-gradient(135deg,#f0e8e0,#e8ddd5);
-  display:flex;align-items:center;justify-content:center;font-size:40px}
 .post-body{padding:12px 14px}
 .post-text{font-size:14px;color:var(--brown2);line-height:1.55;margin-bottom:10px}
 .post-text:empty{display:none}
@@ -97,7 +83,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--brown)
 .btn-action svg{width:20px;height:20px}
 .btn-action.liked svg{fill:var(--red)}
 .comments-section{border-top:1px solid var(--border);padding:10px 14px}
-.comment{display:flex;gap:8px;margin-bottom:8px}
+.comment{display:flex;gap:8px;margin-bottom:8px;align-items:flex-start}
 .comment-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent2);color:var(--white);
   display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;
   flex-shrink:0;overflow:hidden}
@@ -105,6 +91,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--brown)
 .comment-bubble{background:#f5ede0;border-radius:12px;padding:6px 10px;flex:1}
 .comment-name{font-size:11px;font-weight:600;color:var(--brown);margin-bottom:2px}
 .comment-text{font-size:13px;color:var(--brown2)}
+/* Botão excluir comentário */
+.btn-del-comment{background:none;border:none;color:#ccc;font-size:13px;cursor:pointer;
+  padding:2px 4px;flex-shrink:0;line-height:1;margin-top:4px;transition:color .15s;opacity:0}
+.comment:hover .btn-del-comment{opacity:1}
+.btn-del-comment:hover{color:var(--red)}
 .comment-input-row{display:flex;gap:8px;align-items:center;margin-top:8px}
 .comment-input{flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:20px;
   font-size:13px;color:var(--brown);background:var(--cream);font-family:'DM Sans',sans-serif}
@@ -112,15 +103,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--brown)
 .btn-send{width:32px;height:32px;border-radius:50%;background:var(--accent);color:var(--white);
   border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .btn-send svg{width:14px;height:14px}
-
-/* ── NOVO POST ────────────────────────────────────── */
 .btn-new-post{position:fixed;bottom:80px;right:20px;width:54px;height:54px;border-radius:50%;
   background:var(--brown);color:var(--white);border:none;cursor:pointer;font-size:26px;
   box-shadow:0 4px 16px rgba(61,43,31,.4);display:flex;align-items:center;justify-content:center;
   transition:transform .2s,background .2s;z-index:99}
 .btn-new-post:hover{background:var(--accent);transform:scale(1.08)}
-
-/* ── MODAL ────────────────────────────────────────── */
 .modal-overlay{display:none;position:fixed;inset:0;background:var(--overlay);z-index:200;
   align-items:flex-end;justify-content:center}
 .modal-overlay.open{display:flex}
@@ -140,6 +127,26 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--brown)
 .upload-preview .remove-img{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.5);
   color:#fff;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;
   display:flex;align-items:center;justify-content:center;font-size:14px}
+/* ── CROP ── */
+.crop-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:300;
+  flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:14px}
+.crop-modal.open{display:flex}
+.crop-title{color:#fff;font-size:16px;font-weight:700;text-align:center}
+.crop-hint{color:rgba(255,255,255,.55);font-size:12px;text-align:center;margin-top:-8px}
+.crop-frame{width:100%;max-width:360px;aspect-ratio:4/3;border-radius:16px;overflow:hidden;
+  position:relative;background:#111;touch-action:none;border:2px solid rgba(255,255,255,.2)}
+.crop-img{position:absolute;transform-origin:0 0;cursor:grab;user-select:none;-webkit-user-select:none;display:block}
+.crop-img:active{cursor:grabbing}
+.crop-btns{display:flex;gap:10px;width:100%;max-width:360px}
+.crop-btn{flex:1;padding:13px;border:none;border-radius:12px;font-size:14px;font-weight:700;
+  cursor:pointer;font-family:inherit;transition:.15s}
+.crop-btn.cancel{background:rgba(255,255,255,.12);color:#fff}
+.crop-btn.cancel:hover{background:rgba(255,255,255,.2)}
+.crop-btn.confirm{background:var(--accent);color:#fff}
+.crop-btn.confirm:hover{background:#b5682d}
+.crop-zoom-row{display:flex;align-items:center;gap:10px;width:100%;max-width:360px}
+.crop-zoom-row label{color:rgba(255,255,255,.65);font-size:12px;white-space:nowrap}
+.crop-zoom-row input[type=range]{flex:1;accent-color:var(--accent);height:4px}
 textarea{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;
   font-size:14px;color:var(--brown);background:var(--cream);resize:none;
   font-family:'DM Sans',sans-serif;min-height:90px}
@@ -149,8 +156,6 @@ textarea:focus{outline:none;border-color:var(--accent)}
   font-family:'DM Sans',sans-serif;transition:background .2s}
 .btn-post:hover{background:var(--accent)}
 .btn-post:disabled{opacity:.5;cursor:not-allowed}
-
-/* ── PERFIL ────────────────────────────────────────── */
 .profile-page{padding:16px;max-width:500px;margin:0 auto}
 .profile-header{background:var(--card);border-radius:20px;padding:24px;text-align:center;
   margin-bottom:16px;border:1px solid var(--border);box-shadow:0 2px 12px var(--shadow)}
@@ -170,18 +175,12 @@ textarea:focus{outline:none;border-color:var(--accent)}
 .btn-outline:hover{background:var(--brown);color:var(--white)}
 .btn-danger{border-color:var(--red);color:var(--red)}
 .btn-danger:hover{background:var(--red);color:var(--white)}
-
-/* ── MEMBROS ────────────────────────────────────────── */
 .members-page{padding:16px;max-width:500px;margin:0 auto}
 .member-card{background:var(--card);border-radius:16px;padding:14px;display:flex;
   align-items:center;gap:12px;margin-bottom:10px;border:1px solid var(--border)}
 .member-info{flex:1}
 .member-name{font-size:14px;font-weight:600;color:var(--brown)}
 .member-email{font-size:12px;color:var(--gray);margin-top:2px}
-.member-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
-.member-badge.admin{background:#fef3c7;color:#92400e}
-
-/* ── LOADING ────────────────────────────────────────── */
 .loading{text-align:center;padding:40px;color:var(--gray)}
 .photos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:12px;width:100%;max-width:500px}
 .photo-thumb{width:100%;aspect-ratio:1/1;overflow:hidden;cursor:pointer;background:var(--warm);position:relative}
@@ -193,8 +192,7 @@ textarea:focus{outline:none;border-color:var(--accent)}
 .empty{text-align:center;padding:48px 20px;color:var(--gray)}
 .empty-icon{font-size:48px;margin-bottom:12px}
 .empty p{font-size:14px;line-height:1.5}
-
-/* ── STORIES ─────────────────────────────────────── */
+/* Stories */
 .stories-bar{display:flex;gap:12px;padding:14px 16px;overflow-x:auto;scrollbar-width:none;
   background:var(--white);border-bottom:1px solid var(--border)}
 .stories-bar::-webkit-scrollbar{display:none}
@@ -209,11 +207,6 @@ textarea:focus{outline:none;border-color:var(--accent)}
 .story-avatar img{width:100%;height:100%;object-fit:cover}
 .story-name{font-size:10px;color:var(--brown2);max-width:64px;text-align:center;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.story-add-btn{width:20px;height:20px;background:var(--accent);color:#fff;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;
-  position:absolute;bottom:0;right:0;border:2px solid var(--white)}
-
-/* Story viewer */
 .story-viewer{display:none;position:fixed;inset:0;background:#000;z-index:500;flex-direction:column}
 .story-viewer.open{display:flex}
 .story-progress{display:flex;gap:3px;padding:10px 12px 6px;position:absolute;top:0;left:0;right:0;z-index:2}
@@ -232,8 +225,7 @@ textarea:focus{outline:none;border-color:var(--accent)}
 .story-text-overlay{position:absolute;bottom:30px;left:16px;right:16px;z-index:2;
   color:#fff;font-size:15px;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,.8);
   background:rgba(0,0,0,.25);border-radius:12px;padding:10px 14px}
-
-/* ── REAÇÕES ─────────────────────────────────────── */
+/* Reações */
 .reacoes-wrap{position:relative;display:inline-flex;align-items:center}
 .reacoes-picker{display:none;position:absolute;bottom:36px;left:0;background:var(--white);
   border-radius:20px;padding:8px 10px;box-shadow:0 4px 20px rgba(0,0,0,.15);
@@ -246,33 +238,31 @@ textarea:focus{outline:none;border-color:var(--accent)}
 .reacao-count{display:flex;align-items:center;gap:3px;background:var(--cream);
   border-radius:12px;padding:2px 8px;font-size:12px;cursor:pointer;border:1px solid var(--border)}
 .reacao-count.minha{border-color:var(--accent);background:#fff5ed}
+/* PTR */
+.ptr-indicator{position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(-60px);
+  background:var(--brown);color:#fff;padding:8px 16px;border-radius:0 0 16px 16px;
+  font-size:13px;display:flex;align-items:center;gap:8px;transition:transform .3s;z-index:150}
+.ptr-indicator.show{transform:translateX(-50%) translateY(0)}
+.ptr-spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;
+  border-radius:50%;animation:spin .7s linear infinite}
 </style>
 </head>
 <body>
 
-<!-- AUTH -->
 <div id="authScreen">
   <div class="auth-card">
-    <div class="auth-logo">
-      <div class="icon">🦫</div>
-      <h1>Nossa Família</h1>
-      <p>Um espaço só nosso</p>
-    </div>
+    <div class="auth-logo"><div class="icon">🦫</div><h1>Nossa Família</h1><p>Um espaço só nosso</p></div>
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchTab('login')">Entrar</button>
       <button class="auth-tab" onclick="switchTab('cadastro')">Cadastrar</button>
     </div>
     <div class="auth-err" id="authErr"></div>
-
-    <!-- Login -->
     <div id="tabLogin">
       <div class="form-group"><label>E-mail</label><input id="lEmail" type="email" placeholder="seu@email.com"></div>
       <div class="form-group"><label>Senha</label><input id="lSenha" type="password" placeholder="••••••••"></div>
       <button class="btn-auth" onclick="fazerLogin()">Entrar →</button>
       <p class="auth-note">Só membros da família têm acesso.</p>
     </div>
-
-    <!-- Cadastro -->
     <div id="tabCadastro" style="display:none">
       <div class="form-group"><label>Código de convite</label><input id="cCodigo" placeholder="Digite o código secreto"></div>
       <div class="form-group"><label>Seu nome</label><input id="cNome" placeholder="Como quer ser chamado(a)"></div>
@@ -284,7 +274,6 @@ textarea:focus{outline:none;border-color:var(--accent)}
   </div>
 </div>
 
-<!-- APP -->
 <div id="app">
   <div class="topbar">
     <span class="topbar-title">🦫 Nossa Família</span>
@@ -292,22 +281,14 @@ textarea:focus{outline:none;border-color:var(--accent)}
       <div class="avatar-sm" id="topAvatar" onclick="showPage('perfil')"></div>
     </div>
   </div>
-
-
-  <!-- STORIES -->
   <div class="stories-bar" id="storiesBar">
     <div class="loading" style="padding:10px"><div class="spinner" style="width:20px;height:20px;margin:0"></div></div>
   </div>
-
-  <!-- STORY VIEWER -->
   <div class="story-viewer" id="storyViewer">
     <div class="story-progress" id="storyProgress"></div>
     <div class="story-top">
       <div class="story-top-avatar" id="storyAvatar"></div>
-      <div style="flex:1">
-        <div class="story-top-name" id="storyName"></div>
-        <div class="story-top-time" id="storyTime"></div>
-      </div>
+      <div style="flex:1"><div class="story-top-name" id="storyName"></div><div class="story-top-time" id="storyTime"></div></div>
       <button class="story-close" onclick="fecharStory()">✕</button>
     </div>
     <img class="story-img" id="storyImg" src="">
@@ -315,14 +296,8 @@ textarea:focus{outline:none;border-color:var(--accent)}
     <div class="story-tap-prev" onclick="prevStory()"></div>
     <div class="story-tap-next" onclick="nextStory()"></div>
   </div>
-  <!-- PTR INDICATOR -->
   <div class="ptr-indicator" id="ptrIndicator"><div class="ptr-spinner"></div><span id="ptrText">Atualizando...</span></div>
-  <!-- FEED -->
-  <div id="pageFeed" class="feed">
-    <div class="loading"><div class="spinner"></div>Carregando...</div>
-  </div>
-
-  <!-- PERFIL -->
+  <div id="pageFeed" class="feed"><div class="loading"><div class="spinner"></div>Carregando...</div></div>
   <div id="pagePerfil" class="profile-page" style="display:none">
     <div class="profile-header">
       <div class="profile-avatar" id="profileAvatar" onclick="document.getElementById('avatarInput').click()"></div>
@@ -338,8 +313,6 @@ textarea:focus{outline:none;border-color:var(--accent)}
     </div>
     <div class="photos-grid" id="myPhotosGrid"></div>
   </div>
-
-  <!-- PÁGINA PERFIL DE OUTRO USUÁRIO -->
   <div id="pageUserPerfil" class="profile-page" style="display:none">
     <button class="btn-outline" style="margin-bottom:12px" onclick="showPage('membros')">← Voltar</button>
     <div class="profile-header">
@@ -352,26 +325,20 @@ textarea:focus{outline:none;border-color:var(--accent)}
     </div>
     <div class="photos-grid" id="userPhotosGrid"></div>
   </div>
-
-  <!-- MEMBROS -->
   <div id="pageMembros" class="members-page" style="display:none">
     <h3 style="font-family:'Playfair Display',serif;font-size:19px;color:var(--brown);margin-bottom:14px">Membros da família</h3>
     <div id="listaMembros"><div class="loading"><div class="spinner"></div></div></div>
     <button class="btn-outline" style="margin-top:8px" onclick="showPage('perfil')">← Voltar</button>
   </div>
-
   <div class="bottom-nav">
     <button class="nav-item active" id="navFeed" onclick="showPage('feed')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      Feed
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Feed
     </button>
     <button class="nav-item" id="navNovo" onclick="abrirModal()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
-      Publicar
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Publicar
     </button>
     <button class="nav-item" id="navPerfil" onclick="showPage('perfil')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-      Perfil
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Perfil
     </button>
   </div>
 </div>
@@ -379,10 +346,7 @@ textarea:focus{outline:none;border-color:var(--accent)}
 <!-- MODAL NOVO POST -->
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)fecharModal()">
   <div class="modal">
-    <div class="modal-hdr">
-      <h3>Nova publicação</h3>
-      <button class="btn-close" onclick="fecharModal()">✕</button>
-    </div>
+    <div class="modal-hdr"><h3>Nova publicação</h3><button class="btn-close" onclick="fecharModal()">✕</button></div>
     <div class="upload-area" id="uploadArea" onclick="document.getElementById('fotoInput').click()">
       <div class="icon">📷</div>
       <p>Toque para adicionar uma foto<br><small style="color:#bbb">(opcional)</small></p>
@@ -392,8 +356,25 @@ textarea:focus{outline:none;border-color:var(--accent)}
       <button class="remove-img" onclick="removerFoto()">✕</button>
     </div>
     <input type="file" id="fotoInput" accept="image/*" style="display:none" onchange="previewFoto(event)">
-    <textarea id="postTexto" placeholder="O que você quer compartilhar com a família? 💚"></textarea>
+    <textarea id="postTexto" placeholder="O que você quer compartilhar com a família? 🦫"></textarea>
     <button class="btn-post" id="btnPost" onclick="publicar()">Publicar 🦫</button>
+  </div>
+</div>
+
+<!-- CROP MODAL -->
+<div class="crop-modal" id="cropModal">
+  <div class="crop-title">✂️ Ajustar foto</div>
+  <div class="crop-hint">Arraste para reposicionar · Zoom para ajustar</div>
+  <div class="crop-frame" id="cropFrame">
+    <img id="cropImg" class="crop-img" draggable="false" src="">
+  </div>
+  <div class="crop-zoom-row">
+    <label>🔍 Zoom</label>
+    <input type="range" id="cropZoom" min="1" max="3" step="0.01" value="1" oninput="onCropZoom()">
+  </div>
+  <div class="crop-btns">
+    <button class="crop-btn cancel" onclick="cancelarCrop()">Cancelar</button>
+    <button class="crop-btn confirm" onclick="confirmarCrop()">Usar esta foto ✓</button>
   </div>
 </div>
 
@@ -402,148 +383,105 @@ import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-ap
 import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,updateProfile}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import{getDatabase,ref,push,set,get,remove,onValue,query,orderByChild,limitToLast,update,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
-// ── CONFIG ────────────────────────────────────────
-const CFG={
-  apiKey:'AIzaSyC54FUgmARdcGjy1tOVNerFMPvcBL921MI',
-  authDomain:'despesas-c2f24.firebaseapp.com',
-  databaseURL:'https://despesas-c2f24-default-rtdb.firebaseio.com',
-  projectId:'despesas-c2f24',
-};
+const CFG={apiKey:'AIzaSyC54FUgmARdcGjy1tOVNerFMPvcBL921MI',authDomain:'despesas-c2f24.firebaseapp.com',databaseURL:'https://despesas-c2f24-default-rtdb.firebaseio.com',projectId:'despesas-c2f24'};
 const CODIGO_CONVITE='FAMILIA2025';
-
-// ── CLOUDINARY ────────────────────────────────────
-const CLOUD_NAME   = 'du6dxasku';
-const UPLOAD_PRESET= 'familia_social';
+const CLOUD_NAME='du6dxasku';
+const UPLOAD_PRESET='familia_social';
 
 async function uploadImagem(file){
-  const fd = new FormData();
-  fd.append('file', file);
-  fd.append('upload_preset', UPLOAD_PRESET);
-  fd.append('folder','familia_social');
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,{method:'POST',body:fd});
-  const data = await res.json();
+  const fd=new FormData();
+  fd.append('file',file);fd.append('upload_preset',UPLOAD_PRESET);fd.append('folder','familia_social');
+  const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,{method:'POST',body:fd});
+  const data=await res.json();
   if(!data.secure_url) throw new Error('Erro no upload');
   return data.secure_url;
-} // ← mude aqui para o seu código secreto
+}
 
-const app  = initializeApp(CFG);
-const auth = getAuth(app);
-const db   = getDatabase(app);
+const app=initializeApp(CFG);
+const auth=getAuth(app);
+const db=getDatabase(app);
 
-// ── ESTADO ────────────────────────────────────────
-let user=null, userProfile=null, fotoFile=null;
+let user=null,userProfile=null,fotoFile=null;
 
-const $ = id => document.getElementById(id);
-const fmtTempo = ts => {
-  if(!ts) return '';
-  const d = new Date(ts), now = new Date();
-  const diff = Math.floor((now-d)/1000);
-  if(diff<60) return 'agora mesmo';
-  if(diff<3600) return `${Math.floor(diff/60)}min`;
-  if(diff<86400) return `${Math.floor(diff/3600)}h`;
-  return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
-};
-const iniciais = nome => (nome||'?').split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);
-const avatarEl = (nome, fotoUrl, cls='post-avatar') =>
-  fotoUrl ? `<div class="${cls}"><img src="${fotoUrl}" alt="${nome}"></div>`
-           : `<div class="${cls}">${iniciais(nome)}</div>`;
+const $=id=>document.getElementById(id);
+const fmtTempo=ts=>{if(!ts)return'';const d=new Date(ts),now=new Date(),diff=Math.floor((now-d)/1000);if(diff<60)return'agora mesmo';if(diff<3600)return`${Math.floor(diff/60)}min`;if(diff<86400)return`${Math.floor(diff/3600)}h`;return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});};
+const iniciais=nome=>(nome||'?').split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);
+const avatarEl=(nome,fotoUrl,cls='post-avatar')=>fotoUrl?`<div class="${cls}"><img src="${fotoUrl}" alt="${nome}"></div>`:`<div class="${cls}">${iniciais(nome)}</div>`;
 
-// ── AUTH ──────────────────────────────────────────
-window.switchTab = t => {
-  $('tabLogin').style.display    = t==='login'?'':'none';
-  $('tabCadastro').style.display = t==='cadastro'?'':'none';
+// AUTH
+window.switchTab=t=>{
+  $('tabLogin').style.display=t==='login'?'':'none';
+  $('tabCadastro').style.display=t==='cadastro'?'':'none';
   document.querySelectorAll('.auth-tab').forEach((b,i)=>b.classList.toggle('active',(t==='login'&&i===0)||(t==='cadastro'&&i===1)));
   $('authErr').style.display='none';
 };
-
-function showErr(msg){ $('authErr').textContent=msg; $('authErr').style.display='block'; }
-
-window.fazerLogin = async() => {
-  const email=$('lEmail').value.trim(), senha=$('lSenha').value;
+function showErr(msg){$('authErr').textContent=msg;$('authErr').style.display='block';}
+window.fazerLogin=async()=>{
+  const email=$('lEmail').value.trim(),senha=$('lSenha').value;
   if(!email||!senha){showErr('Preencha e-mail e senha');return;}
-  try{
-    await signInWithEmailAndPassword(auth,email,senha);
-  }catch(e){
-    showErr(e.code==='auth/user-not-found'||e.code==='auth/wrong-password'?'E-mail ou senha incorretos':'Erro ao entrar. Tente novamente.');
-  }
+  try{await signInWithEmailAndPassword(auth,email,senha);}
+  catch(e){showErr(e.code==='auth/user-not-found'||e.code==='auth/wrong-password'||e.code==='auth/invalid-credential'?'E-mail ou senha incorretos':'Erro ao entrar.');}
 };
-
-window.fazerCadastro = async() => {
+window.fazerCadastro=async()=>{
   const codigo=$('cCodigo').value.trim();
   if(codigo.toUpperCase()!==CODIGO_CONVITE.toUpperCase()){showErr('Código de convite inválido.');return;}
-  const nome=$('cNome').value.trim(), email=$('cEmail').value.trim(), senha=$('cSenha').value;
+  const nome=$('cNome').value.trim(),email=$('cEmail').value.trim(),senha=$('cSenha').value;
   if(!nome||!email||!senha){showErr('Preencha todos os campos');return;}
   if(senha.length<6){showErr('Senha deve ter ao menos 6 caracteres');return;}
   try{
-    const cred = await createUserWithEmailAndPassword(auth,email,senha);
+    const cred=await createUserWithEmailAndPassword(auth,email,senha);
     await updateProfile(cred.user,{displayName:nome});
     await set(ref(db,`usuarios/${cred.user.uid}`),{nome,email,uid:cred.user.uid,entrou:Date.now()});
-  }catch(e){
-    showErr(e.code==='auth/email-already-in-use'?'Este e-mail já está cadastrado':'Erro ao criar conta.');
-  }
+  }catch(e){showErr(e.code==='auth/email-already-in-use'?'Este e-mail já está cadastrado':'Erro ao criar conta.');}
 };
+window.sair=async()=>{if(confirm('Sair da família?'))await signOut(auth);};
 
-window.sair = async() => { if(confirm('Sair da família?')) await signOut(auth); };
-
-// ── NAVIGATION ────────────────────────────────────
-window.showPage = p => {
+// NAVIGATION
+window.showPage=p=>{
   ['Feed','Perfil','Membros'].forEach(n=>$(('page'+n)).style.display='none');
+  if($('pageUserPerfil'))$('pageUserPerfil').style.display='none';
   $('page'+p.charAt(0).toUpperCase()+p.slice(1)).style.display='';
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
   const navMap={feed:'navFeed',perfil:'navPerfil'};
-  if(navMap[p]) $(navMap[p]).classList.add('active');
-  if(p==='perfil') renderPerfil();
-  if(p==='membros') renderMembros();
+  if(navMap[p])$(navMap[p]).classList.add('active');
+  if(p==='perfil')renderPerfil();
+  if(p==='membros')renderMembros();
 };
 
-
-// ── REAÇÕES ───────────────────────────────────────
+// REAÇÕES
 function renderReacoesBar(p){
-  if(!p.reacoes) return '';
+  if(!p.reacoes)return'';
   const counts={};
-  Object.values(p.reacoes).forEach(r=>{ counts[r.emoji]=(counts[r.emoji]||0)+1; });
+  Object.values(p.reacoes).forEach(r=>{counts[r.emoji]=(counts[r.emoji]||0)+1;});
   const minhaReacao=p.reacoes[user?.uid]?.emoji;
   return Object.entries(counts).map(([emoji,n])=>
     `<span class="reacao-count${emoji===minhaReacao?' minha':''}" onclick="reagir('${p.id}','${emoji}')">${emoji} ${n}</span>`
   ).join('');
 }
-
-window.togglePicker=id=>{
-  const el=$('rp-'+id);
-  el.classList.toggle('open');
-};
-window.closePicker=id=>{ const el=$('rp-'+id); if(el) el.classList.remove('open'); };
+window.togglePicker=id=>{$('rp-'+id).classList.toggle('open');};
+window.closePicker=id=>{const el=$('rp-'+id);if(el)el.classList.remove('open');};
 window.reagir=async(id,emoji)=>{
   closePicker(id);
   const r=ref(db,`posts/${id}/reacoes/${user.uid}`);
   const snap=await get(r);
-  // Se já tem essa reação, remove; se tem outra ou não tem, coloca a nova
-  if(snap.exists()&&snap.val().emoji===emoji){
-    await set(r,null);
-  } else {
-    await set(r,{emoji,uid:user.uid,nome:userProfile?.nome||user.displayName||'Familiar'});
-  }
+  if(snap.exists()&&snap.val().emoji===emoji)await set(r,null);
+  else await set(r,{emoji,uid:user.uid,nome:userProfile?.nome||user.displayName||'Familiar'});
 };
 
-// ── STORIES ───────────────────────────────────────
-let storiesData=[], storiesGrouped=[], currentGroupIdx=0, currentStoryIdx=0, storyTimer=null;
+// STORIES
+let storiesData=[],storiesGrouped=[],currentGroupIdx=0,currentStoryIdx=0,storyTimer=null;
 const STORY_DURATION=5000;
 
 function renderStoriesBar(){
-  onValue(ref(db,'stories'), snap=>{
-    storiesData=[]; storiesGrouped=[];
+  onValue(ref(db,'stories'),snap=>{
+    storiesData=[];storiesGrouped=[];
     const now=Date.now();
-    snap.forEach(c=>{ const s={id:c.key,...c.val()}; if(now-s.ts<86400000) storiesData.push(s); });
-    // Agrupar por usuário
+    snap.forEach(c=>{const s={id:c.key,...c.val()};if(now-s.ts<86400000)storiesData.push(s);});
     const byUser={};
-    storiesData.forEach(s=>{
-      if(!byUser[s.uid]) byUser[s.uid]={uid:s.uid,nome:s.nome,foto:s.foto,stories:[]};
-      byUser[s.uid].stories.push(s);
-    });
+    storiesData.forEach(s=>{if(!byUser[s.uid])byUser[s.uid]={uid:s.uid,nome:s.nome,foto:s.foto,stories:[]};byUser[s.uid].stories.push(s);});
     storiesGrouped=Object.values(byUser);
     const bar=$('storiesBar');
     const vistos=JSON.parse(localStorage.getItem('storiesVistos')||'{}');
-    // Botão "Adicionar story" sempre primeiro
     let html=`<div class="story-item" onclick="document.getElementById('storyInput').click()">
       <div class="story-ring add" style="background:none">
         <div class="story-avatar" style="background:var(--cream);border:2px dashed var(--border)">
@@ -556,8 +494,7 @@ function renderStoriesBar(){
       const visto=g.stories.every(s=>vistos[s.id]);
       html+=`<div class="story-item" onclick="abrirStory(${gi})">
         <div class="story-ring${visto?' visto':''}">
-          ${g.foto?`<div class="story-avatar"><img src="${g.foto}"></div>`
-            :`<div class="story-avatar">${iniciais(g.nome)}</div>`}
+          ${g.foto?`<div class="story-avatar"><img src="${g.foto}"></div>`:`<div class="story-avatar">${iniciais(g.nome)}</div>`}
         </div>
         <span class="story-name">${g.nome.split(' ')[0]}</span>
       </div>`;
@@ -567,119 +504,80 @@ function renderStoriesBar(){
 }
 
 window.publicarStory=async e=>{
-  const file=e.target.files[0]; if(!file) return;
-  const btn=document.createElement('div');
+  const file=e.target.files[0];if(!file)return;
   try{
     const url=await uploadImagem(file);
-    await push(ref(db,'stories'),{
-      uid:user.uid, nome:userProfile?.nome||'Familiar',
-      foto:userProfile?.foto||null, img:url, ts:Date.now()
-    });
-  }catch(err){ alert('Erro ao publicar story'); }
+    await push(ref(db,'stories'),{uid:user.uid,nome:userProfile?.nome||'Familiar',foto:userProfile?.foto||null,img:url,ts:Date.now()});
+  }catch(err){alert('Erro ao publicar story');}
   e.target.value='';
 };
-
-window.abrirStory=(gi)=>{
-  currentGroupIdx=gi; currentStoryIdx=0;
-  $('storyViewer').classList.add('open');
-  mostrarStoryAtual();
-};
+window.abrirStory=gi=>{currentGroupIdx=gi;currentStoryIdx=0;$('storyViewer').classList.add('open');mostrarStoryAtual();};
 
 function mostrarStoryAtual(){
   clearTimeout(storyTimer);
   const grupo=storiesGrouped[currentGroupIdx];
-  if(!grupo) return fecharStory();
+  if(!grupo)return fecharStory();
   const story=grupo.stories[currentStoryIdx];
-  if(!story) return fecharStory();
-  // Marcar como visto
+  if(!story)return fecharStory();
   const vistos=JSON.parse(localStorage.getItem('storiesVistos')||'{}');
   vistos[story.id]=true;
   localStorage.setItem('storiesVistos',JSON.stringify(vistos));
-  // UI
   $('storyImg').src=story.img||'';
   $('storyName').textContent=grupo.nome;
   $('storyTime').textContent=fmtTempo(story.ts);
   const av=$('storyAvatar');
   av.innerHTML=grupo.foto?`<img src="${grupo.foto}">`:'<span style="color:#fff;font-weight:700">'+iniciais(grupo.nome)+'</span>';
-  if(story.texto){ $('storyTextOverlay').textContent=story.texto; $('storyTextOverlay').style.display=''; }
+  if(story.texto){$('storyTextOverlay').textContent=story.texto;$('storyTextOverlay').style.display='';}
   else $('storyTextOverlay').style.display='none';
-  // Progress bars
   const bars=grupo.stories.map((_,i)=>`<div class="story-prog-bar"><div class="story-prog-fill" id="spf-${i}"></div></div>`).join('');
   $('storyProgress').innerHTML=bars;
-  // Preencher barras anteriores
-  for(let i=0;i<currentStoryIdx;i++){
-    const el=$('spf-'+i); if(el) el.style.width='100%';
-  }
-  // Animar barra atual
+  for(let i=0;i<currentStoryIdx;i++){const el=$('spf-'+i);if(el)el.style.width='100%';}
   const fill=$('spf-'+currentStoryIdx);
-  if(fill){ setTimeout(()=>{ fill.style.transitionDuration=STORY_DURATION+'ms'; fill.style.width='100%'; },50); }
-  storyTimer=setTimeout(nextStory, STORY_DURATION);
+  if(fill){setTimeout(()=>{fill.style.transitionDuration=STORY_DURATION+'ms';fill.style.width='100%';},50);}
+  storyTimer=setTimeout(nextStory,STORY_DURATION);
 }
+window.nextStory=()=>{const grupo=storiesGrouped[currentGroupIdx];if(!grupo)return fecharStory();if(currentStoryIdx<grupo.stories.length-1){currentStoryIdx++;mostrarStoryAtual();}else if(currentGroupIdx<storiesGrouped.length-1){currentGroupIdx++;currentStoryIdx=0;mostrarStoryAtual();}else fecharStory();};
+window.prevStory=()=>{if(currentStoryIdx>0){currentStoryIdx--;mostrarStoryAtual();}else if(currentGroupIdx>0){currentGroupIdx--;currentStoryIdx=0;mostrarStoryAtual();}};
+window.fecharStory=()=>{clearTimeout(storyTimer);$('storyViewer').classList.remove('open');renderStoriesBar();};
 
-window.nextStory=()=>{
-  const grupo=storiesGrouped[currentGroupIdx];
-  if(!grupo) return fecharStory();
-  if(currentStoryIdx<grupo.stories.length-1){ currentStoryIdx++; mostrarStoryAtual(); }
-  else if(currentGroupIdx<storiesGrouped.length-1){ currentGroupIdx++; currentStoryIdx=0; mostrarStoryAtual(); }
-  else fecharStory();
-};
-
-window.prevStory=()=>{
-  if(currentStoryIdx>0){ currentStoryIdx--; mostrarStoryAtual(); }
-  else if(currentGroupIdx>0){ currentGroupIdx--; currentStoryIdx=0; mostrarStoryAtual(); }
-};
-
-window.fecharStory=()=>{
-  clearTimeout(storyTimer);
-  $('storyViewer').classList.remove('open');
-  renderStoriesBar();
-};
-
-// ── FEED ──────────────────────────────────────────
-let feedListenerAtivo = false;
+// FEED
+let feedListenerAtivo=false;
 function renderFeed(){
-  const feedEl = $('pageFeed');
-  if(feedListenerAtivo) return;
-  feedListenerAtivo = true;
+  const feedEl=$('pageFeed');
+  if(feedListenerAtivo)return;
+  feedListenerAtivo=true;
   feedEl.innerHTML='<div class="loading"><div class="spinner"></div></div>';
-
-  onValue(ref(db,'posts'), snap=>{
+  onValue(ref(db,'posts'),snap=>{
     const posts=[];
-    snap.forEach(c=>{
-      const v=c.val();
-      if(v) posts.push({id:c.key,...v});
-    });
+    snap.forEach(c=>{const v=c.val();if(v)posts.push({id:c.key,...v});});
     posts.sort((a,b)=>(b.ts||0)-(a.ts||0));
-    if(!posts.length){
-      feedEl.innerHTML=`<div class="empty"><div class="empty-icon">🦫</div><p>Nenhuma publicação ainda.<br>Seja o primeiro a compartilhar!</p></div>`;
-      return;
-    }
+    if(!posts.length){feedEl.innerHTML=`<div class="empty"><div class="empty-icon">🦫</div><p>Nenhuma publicação ainda.<br>Seja o primeiro a compartilhar!</p></div>`;return;}
     feedEl.innerHTML=posts.map(p=>renderPost(p)).join('');
   });
 }
 
 function renderPost(p){
-  const comments = p.comentarios ? Object.values(p.comentarios) : [];
-  const commentsHtml = comments.map(c=>`
-    <div class="comment">
+  // Comentários com botão de excluir para o autor
+  const commentsHtml=Object.entries(p.comentarios||{}).map(([cid,c])=>`
+    <div class="comment" id="comment-${cid}">
       ${avatarEl(c.nome,c.foto,'comment-avatar')}
       <div class="comment-bubble">
         <div class="comment-name">${c.nome}</div>
         <div class="comment-text">${c.texto}</div>
       </div>
+      ${c.uid===user?.uid?`<button class="btn-del-comment" title="Apagar comentário" onclick="excluirComentario('${p.id}','${cid}')">🗑️</button>`:''}
     </div>`).join('');
-  const imgHtml = p.foto
-    ? `<img class="post-img" src="${p.foto}" loading="lazy" alt="foto">`
-    : '';
-  return `
+
+  const imgHtml=p.foto?`<img class="post-img" src="${p.foto}" loading="lazy" alt="foto">`:'';
+  return`
   <div class="post-card" id="post-${p.id}">
     <div class="post-header">
-      ${avatarEl(p.autorNome, p.autorFoto)}
+      ${avatarEl(p.autorNome,p.autorFoto)}
       <div class="post-meta">
         <div class="post-name">${p.autorNome||'Familiar'}</div>
         <div class="post-time">${fmtTempo(p.ts)}</div>
       </div>
-      ${p.autorUid===user?.uid?`<button class="btn-delete-post" onclick="excluirPost('${p.id}')" title="Apagar publicação">🗑️</button>`:''}
+      ${p.autorUid===user?.uid?`<button class="btn-delete-post" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:16px;padding:4px" onclick="excluirPost('${p.id}')" title="Apagar publicação">🗑️</button>`:''}
     </div>
     ${imgHtml}
     ${p.texto?`<div class="post-body"><div class="post-text">${p.texto}</div></div>`:''}
@@ -687,7 +585,15 @@ function renderPost(p){
     <div class="post-actions">
       <div class="reacoes-wrap">
         <div class="reacoes-picker" id="rp-${p.id}">
-          <button class="reacao-opt" onclick="reagir('${p.id}','❤️')">❤️</button><button class="reacao-opt" onclick="reagir('${p.id}','😂')">😂</button><button class="reacao-opt" onclick="reagir('${p.id}','😮')">😮</button><button class="reacao-opt" onclick="reagir('${p.id}','😢')">😢</button><button class="reacao-opt" onclick="reagir('${p.id}','👏')">👏</button><button class="reacao-opt" onclick="reagir('${p.id}','🦫')">🦫</button><button class="reacao-opt" onclick="reagir('${p.id}','🐒')">🐒</button><button class="reacao-opt" onclick="reagir('${p.id}','🦥')">🦥</button><button class="reacao-opt" onclick="reagir('${p.id}','🐷')">🐷</button>
+          <button class="reacao-opt" onclick="reagir('${p.id}','❤️')">❤️</button>
+          <button class="reacao-opt" onclick="reagir('${p.id}','😂')">😂</button>
+          <button class="reacao-opt" onclick="reagir('${p.id}','😮')">😮</button>
+          <button class="reacao-opt" onclick="reagir('${p.id}','😢')">😢</button>
+          <button class="reacao-opt" onclick="reagir('${p.id}','👏')">👏</button>
+          <button class="reacao-opt" onclick="reagir('${p.id}','🦫')">🦫</button>
+          <button class="reacao-opt" onclick="reagir('${p.id}','🐒')">🐒</button>
+          <button class="reacao-opt" onclick="reagir('${p.id}','🦥')">🦥</button>
+          <button class="reacao-opt" onclick="reagir('${p.id}','🐷')">🐷</button>
         </div>
         <button class="btn-action" onclick="togglePicker('${p.id}')" onblur="setTimeout(()=>closePicker('${p.id}'),200)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
@@ -696,13 +602,13 @@ function renderPost(p){
       </div>
       <button class="btn-action" onclick="focarComentario('${p.id}')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-        ${comments.length>0?comments.length:''}
+        ${Object.keys(p.comentarios||{}).length||''}
       </button>
     </div>
     <div class="comments-section">
       <div id="comments-${p.id}">${commentsHtml}</div>
       <div class="comment-input-row">
-        ${avatarEl(userProfile?.nome||'', userProfile?.foto||'', 'comment-avatar')}
+        ${avatarEl(userProfile?.nome||'',userProfile?.foto||'','comment-avatar')}
         <input class="comment-input" id="ci-${p.id}" placeholder="Comentar..." onkeydown="if(event.key==='Enter')enviarComentario('${p.id}')">
         <button class="btn-send" onclick="enviarComentario('${p.id}')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -712,255 +618,217 @@ function renderPost(p){
   </div>`;
 }
 
-
-
-window.focarComentario = id => { const el=$(`ci-${id}`); if(el){el.focus();el.scrollIntoView({behavior:'smooth',block:'center'});} };
-
-window.enviarComentario = async id => {
-  const el=$(`ci-${id}`); if(!el||!el.value.trim()) return;
-  await push(ref(db,`posts/${id}/comentarios`),{
-    texto:el.value.trim(), uid:user.uid,
-    nome:userProfile?.nome||user.displayName||'Familiar',
-    foto:userProfile?.foto||null, ts:Date.now()
-  });
+window.focarComentario=id=>{const el=$(`ci-${id}`);if(el){el.focus();el.scrollIntoView({behavior:'smooth',block:'center'});}};
+window.enviarComentario=async id=>{
+  const el=$(`ci-${id}`);if(!el||!el.value.trim())return;
+  await push(ref(db,`posts/${id}/comentarios`),{texto:el.value.trim(),uid:user.uid,nome:userProfile?.nome||user.displayName||'Familiar',foto:userProfile?.foto||null,ts:Date.now()});
   el.value='';
 };
-
-// ── NOVO POST ─────────────────────────────────────
-window.abrirModal = () => { $('modalOverlay').classList.add('open'); $('postTexto').focus(); };
-window.fecharModal = () => { $('modalOverlay').classList.remove('open'); fotoFile=null; $('uploadPreview').style.display='none'; $('uploadArea').style.display=''; $('postTexto').value=''; };
-
-window.previewFoto = e => {
-  fotoFile = e.target.files[0];
-  if(!fotoFile) return;
-  const url = URL.createObjectURL(fotoFile);
-  $('previewImg').src=url; $('uploadPreview').style.display=''; $('uploadArea').style.display='none';
+window.excluirComentario=async(postId,comentId)=>{
+  if(!confirm('Apagar este comentário?'))return;
+  await remove(ref(db,`posts/${postId}/comentarios/${comentId}`));
 };
-window.removerFoto = () => { fotoFile=null; $('uploadPreview').style.display='none'; $('uploadArea').style.display=''; $('fotoInput').value=''; };
+window.excluirPost=async id=>{if(!confirm('Apagar esta publicação?'))return;await remove(ref(db,'posts/'+id));};
 
-window.publicar = async() => {
+// MODAL NOVO POST
+window.abrirModal=()=>{$('modalOverlay').classList.add('open');$('postTexto').focus();};
+window.fecharModal=()=>{$('modalOverlay').classList.remove('open');fotoFile=null;$('uploadPreview').style.display='none';$('uploadArea').style.display='';$('postTexto').value='';$('fotoInput').value='';};
+window.removerFoto=()=>{fotoFile=null;$('uploadPreview').style.display='none';$('uploadArea').style.display='';$('fotoInput').value='';};
+
+// ── CROP ──────────────────────────────────────────
+let cs={scale:1,x:0,y:0,nw:0,nh:0,minScale:1};
+
+window.previewFoto=e=>{
+  const file=e.target.files[0];if(!file)return;
+  const url=URL.createObjectURL(file);
+  const img=$('cropImg');
+  img.onload=()=>{
+    cs.nw=img.naturalWidth;cs.nh=img.naturalHeight;
+    cs.scale=1;cs.x=0;cs.y=0;
+    $('cropZoom').value=1;
+    // calc min scale to cover frame (4:3)
+    setTimeout(()=>{
+      const fw=$('cropFrame').offsetWidth,fh=$('cropFrame').offsetHeight;
+      const minS=Math.max(fw/cs.nw,fh/cs.nh);
+      cs.minScale=minS;
+      cs.scale=minS;
+      $('cropZoom').min=minS;
+      $('cropZoom').max=minS*3;
+      $('cropZoom').value=minS;
+      // center
+      const iw=cs.nw*cs.scale,ih=cs.nh*cs.scale;
+      cs.x=(fw-iw)/2;cs.y=(fh-ih)/2;
+      applyT();
+      $('cropModal').classList.add('open');
+    },50);
+  };
+  img.src=url;
+};
+
+function applyT(){
+  $('cropImg').style.width=cs.nw+'px';
+  $('cropImg').style.height=cs.nh+'px';
+  $('cropImg').style.transform=`translate(${cs.x}px,${cs.y}px) scale(${cs.scale})`;
+}
+function clamp(){
+  const fw=$('cropFrame').offsetWidth,fh=$('cropFrame').offsetHeight;
+  const iw=cs.nw*cs.scale,ih=cs.nh*cs.scale;
+  cs.x=Math.min(0,Math.max(fw-iw,cs.x));
+  cs.y=Math.min(0,Math.max(fh-ih,cs.y));
+}
+
+window.onCropZoom=()=>{
+  const ns=parseFloat($('cropZoom').value);
+  const fw=$('cropFrame').offsetWidth,fh=$('cropFrame').offsetHeight;
+  const cx=fw/2-cs.x,cy=fh/2-cs.y;
+  const r=ns/cs.scale;
+  cs.x=fw/2-cx*r;cs.y=fh/2-cy*r;
+  cs.scale=ns;clamp();applyT();
+};
+
+// drag (mouse + touch)
+(function(){
+  let drag=false,lx=0,ly=0;
+  const inFrame=e=>{const f=$('cropFrame');return f&&f.contains(e.target);};
+  document.addEventListener('mousedown',e=>{if(inFrame(e)){drag=true;lx=e.clientX;ly=e.clientY;e.preventDefault();}});
+  document.addEventListener('mousemove',e=>{if(!drag)return;cs.x+=e.clientX-lx;cs.y+=e.clientY-ly;lx=e.clientX;ly=e.clientY;clamp();applyT();});
+  document.addEventListener('mouseup',()=>{drag=false;});
+  document.addEventListener('touchstart',e=>{if(inFrame(e)&&e.touches.length===1){drag=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;}},{passive:true});
+  document.addEventListener('touchmove',e=>{if(!drag)return;e.preventDefault();cs.x+=e.touches[0].clientX-lx;cs.y+=e.touches[0].clientY-ly;lx=e.touches[0].clientX;ly=e.touches[0].clientY;clamp();applyT();},{passive:false});
+  document.addEventListener('touchend',()=>{drag=false;},{passive:true});
+})();
+
+window.cancelarCrop=()=>{$('cropModal').classList.remove('open');$('fotoInput').value='';fotoFile=null;};
+
+window.confirmarCrop=()=>{
+  const frame=$('cropFrame');
+  const fw=frame.offsetWidth,fh=frame.offsetHeight;
+  const dpr=window.devicePixelRatio||1;
+  const canvas=document.createElement('canvas');
+  canvas.width=fw*dpr;canvas.height=fh*dpr;
+  const ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  ctx.drawImage($('cropImg'),cs.x,cs.y,cs.nw*cs.scale,cs.nh*cs.scale);
+  canvas.toBlob(blob=>{
+    fotoFile=new File([blob],'foto.jpg',{type:'image/jpeg'});
+    $('previewImg').src=URL.createObjectURL(blob);
+    $('uploadPreview').style.display='';
+    $('uploadArea').style.display='none';
+    $('cropModal').classList.remove('open');
+  },'image/jpeg',0.92);
+};
+
+window.publicar=async()=>{
   const texto=$('postTexto').value.trim();
   if(!texto&&!fotoFile){alert('Adicione uma foto ou texto.');return;}
-  const btn=$('btnPost'); btn.disabled=true; btn.textContent='Publicando...';
+  const btn=$('btnPost');btn.disabled=true;btn.textContent='Publicando...';
   try{
     let fotoUrl=null;
-    if(fotoFile){
-      fotoUrl = await uploadImagem(fotoFile);
-    }
-    // Buscar perfil atualizado antes de publicar
+    if(fotoFile)fotoUrl=await uploadImagem(fotoFile);
     const snap=await get(ref(db,`usuarios/${user.uid}`));
     const perfil=snap.val()||{};
-    await push(ref(db,'posts'),{
-      texto, foto:fotoUrl,
-      autorUid:user.uid,
-      autorNome:perfil.nome||user.displayName||'Familiar',
-      autorFoto:perfil.foto||null,
-      ts:Date.now()
-    });
+    await push(ref(db,'posts'),{texto,foto:fotoUrl,autorUid:user.uid,autorNome:perfil.nome||user.displayName||'Familiar',autorFoto:perfil.foto||null,ts:Date.now()});
     fecharModal();
-  }catch(e){ alert('Erro ao publicar. Tente novamente.'); }
-  btn.disabled=false; btn.textContent='Publicar 🦫';
+  }catch(e){alert('Erro ao publicar. Tente novamente.');}
+  btn.disabled=false;btn.textContent='Publicar 🦫';
 };
 
-// ── PERFIL ────────────────────────────────────────
+// PERFIL
 async function renderPerfil(){
-  const snap = await get(ref(db,`usuarios/${user.uid}`));
-  const p = snap.val()||{};
+  const snap=await get(ref(db,`usuarios/${user.uid}`));
+  const p=snap.val()||{};
   $('profileName').textContent=p.nome||user.displayName||'—';
   $('profileEmail').textContent=user.email;
   $('profileAvatar').innerHTML=p.foto?`<img src="${p.foto}">`:(iniciais(p.nome||'?'));
-
-  // Stats
   const postsSnap=await get(ref(db,'posts'));
   let myPosts=0,myLikes=0;
-  postsSnap.forEach(c=>{
-    const post=c.val();
-    if(post.autorUid===user.uid){myPosts++;if(post.curtidas)myLikes+=Object.keys(post.curtidas).length;}
-  });
-  $('statPosts').textContent=myPosts;
-  $('statLikes').textContent=myLikes;
-
-  // Grid fotos próprias
+  postsSnap.forEach(c=>{const post=c.val();if(post.autorUid===user.uid){myPosts++;if(post.curtidas)myLikes+=Object.keys(post.curtidas).length;}});
+  $('statPosts').textContent=myPosts;$('statLikes').textContent=myLikes;
   const myPhotos=[];
   postsSnap.forEach(c=>{const post=c.val();if(post.autorUid===user.uid&&post.foto)myPhotos.push({id:c.key,...post});});
   myPhotos.sort((a,b)=>b.ts-a.ts);
   const grid=$('myPhotosGrid');
-  grid.innerHTML=myPhotos.length
-    ?myPhotos.map(p=>`<div class="photo-thumb" onclick="abrirFotoPost('${p.id}')"><img src="${p.foto}" loading="lazy"></div>`).join('')
-    :'<div class="photos-empty">Nenhuma foto publicada ainda</div>';
+  grid.innerHTML=myPhotos.length?myPhotos.map(p=>`<div class="photo-thumb" onclick="abrirFotoPost('${p.id}')"><img src="${p.foto}" loading="lazy"></div>`).join(''):'<div class="photos-empty">Nenhuma foto publicada ainda</div>';
 }
-
-window.uploadAvatar = async e => {
-  const file=e.target.files[0]; if(!file) return;
-  try{
-    const url=await uploadImagem(file);
-    await update(ref(db,`usuarios/${user.uid}`),{foto:url});
-    userProfile={...userProfile,foto:url};
-    $('profileAvatar').innerHTML=`<img src="${url}">`;
-    $('topAvatar').innerHTML=`<img src="${url}">`;
-  }catch(e){alert('Erro ao enviar foto.');}
+window.uploadAvatar=async e=>{
+  const file=e.target.files[0];if(!file)return;
+  try{const url=await uploadImagem(file);await update(ref(db,`usuarios/${user.uid}`),{foto:url});userProfile={...userProfile,foto:url};$('profileAvatar').innerHTML=`<img src="${url}">`;$('topAvatar').innerHTML=`<img src="${url}">`;}
+  catch(e){alert('Erro ao enviar foto.');}
 };
 
-// ── MEMBROS ───────────────────────────────────────
+// MEMBROS
 async function renderMembros(){
   const snap=await get(ref(db,'usuarios'));
-  const el=$('listaMembros'); el.innerHTML='';
+  const el=$('listaMembros');el.innerHTML='';
   snap.forEach(c=>{
-    const m=c.val();
-    const uid=c.key;
+    const m=c.val(),uid=c.key;
     el.innerHTML+=`<div class="member-card" style="cursor:pointer" onclick="verPerfilUsuario('${uid}')">
       ${avatarEl(m.nome,m.foto)}
-      <div class="member-info">
-        <div class="member-name">${m.nome}</div>
-        <div class="member-email">${m.email}</div>
-      </div>
+      <div class="member-info"><div class="member-name">${m.nome}</div><div class="member-email">${m.email}</div></div>
       <span style="color:var(--gray);font-size:18px">›</span>
     </div>`;
   });
 }
 
-// ── QUEM REAGIU ──────────────────────────────────
-window.verReacoes=async(postId,emoji)=>{
-  const snap=await get(ref(db,`posts/${postId}/reacoes`));
-  const reacoes=snap.val()||{};
-  const lista=Object.values(reacoes).filter(r=>r.emoji===emoji);
-  $('reacModalTitulo').textContent=`${emoji} ${lista.length} reação${lista.length!==1?'ões':''}`;
-  $('reacModalLista').innerHTML=lista.map(r=>`
-    <div class="reac-person">
-      <span class="reac-emoji">${r.emoji}</span>
-      <span class="reac-person-name">${r.nome||'Familiar'}</span>
-    </div>`).join('') || '<div style="color:var(--gray);font-size:14px">Ninguém ainda</div>';
-  $('reacModal').classList.add('open');
-};
-window.excluirPost=async(id)=>{
-  if(!confirm('Apagar esta publicação?')) return;
-  await remove(ref(db,'posts/'+id));
-};
-
-window.fecharReacModal=()=>$('reacModal').classList.remove('open');
-
-// ── PERFIL DE OUTRO USUÁRIO ───────────────────────
-window.verPerfilUsuario=async(uid)=>{
+window.verPerfilUsuario=async uid=>{
   document.querySelectorAll('.page,.profile-page').forEach(p=>p.style.display='none');
-  const pgUp=$('pageUserPerfil'); pgUp.style.display='';
-
+  const pgUp=$('pageUserPerfil');pgUp.style.display='';
   const uSnap=await get(ref(db,`usuarios/${uid}`));
   const u=uSnap.val()||{};
   $('userPerfilAvatar').innerHTML=u.foto?`<img src="${u.foto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(iniciais(u.nome||'?'));
   $('userPerfilName').textContent=u.nome||'—';
-
   const postsSnap=await get(ref(db,'posts'));
   let posts=0,likes=0,fotos=[];
-  postsSnap.forEach(c=>{
-    const p=c.val();
-    if(p.autorUid===uid){
-      posts++;
-      if(p.reacoes) likes+=Object.keys(p.reacoes).length;
-      if(p.foto) fotos.push({id:c.key,...p});
-    }
-  });
+  postsSnap.forEach(c=>{const p=c.val();if(p.autorUid===uid){posts++;if(p.reacoes)likes+=Object.keys(p.reacoes).length;if(p.foto)fotos.push({id:c.key,...p});}});
   fotos.sort((a,b)=>b.ts-a.ts);
-  $('userPerfilPosts').textContent=posts;
-  $('userPerfilLikes').textContent=likes;
-
+  $('userPerfilPosts').textContent=posts;$('userPerfilLikes').textContent=likes;
   const grid=$('userPhotosGrid');
-  grid.innerHTML=fotos.length
-    ?fotos.map(p=>`<div class="photo-thumb" onclick="abrirFotoPost('${p.id}')"><img src="${p.foto}" loading="lazy"></div>`).join('')
-    :'<div class="photos-empty">Nenhuma foto publicada ainda</div>';
+  grid.innerHTML=fotos.length?fotos.map(p=>`<div class="photo-thumb" onclick="abrirFotoPost('${p.id}')"><img src="${p.foto}" loading="lazy"></div>`).join(''):'<div class="photos-empty">Nenhuma foto publicada ainda</div>';
 };
 
-// ── ABRIR FOTO NO FEED ────────────────────────────
 window.abrirFotoPost=id=>{
-  showPage({dataset:{page:'feed'}});
-  setTimeout(()=>{
-    const el=document.getElementById('post-'+id);
-    if(el) el.scrollIntoView({behavior:'smooth',block:'center'});
-  },300);
+  showPage('feed');
+  setTimeout(()=>{const el=document.getElementById('post-'+id);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},300);
 };
 
-// ── PULL TO REFRESH ──────────────────────────────
+// PTR
 (function(){
-  let startY=0, pulling=false, threshold=80;
-  document.addEventListener('touchstart', e=>{
-    if(window.scrollY===0) { startY=e.touches[0].clientY; pulling=true; }
-  },{passive:true});
-  document.addEventListener('touchmove', e=>{
-    if(!pulling) return;
-    const dist=e.touches[0].clientY - startY;
-    if(dist>20 && window.scrollY===0){
-      const ind=document.getElementById('ptrIndicator');
-      if(ind) ind.classList.add('show');
-    }
-  },{passive:true});
-  document.addEventListener('touchend', e=>{
-    if(!pulling) return;
-    pulling=false;
-    const dist=e.changedTouches[0].clientY - startY;
-    const ind=document.getElementById('ptrIndicator');
-    if(dist>threshold && window.scrollY===0){
-      if(ind){ document.getElementById('ptrText').textContent='Atualizando...'; }
-      // Força re-render do feed
-      setTimeout(()=>{
-        if(ind) ind.classList.remove('show');
-      }, 1000);
-    } else {
-      if(ind) ind.classList.remove('show');
-    }
-  },{passive:true});
+  let startY=0,pulling=false;
+  document.addEventListener('touchstart',e=>{if(window.scrollY===0){startY=e.touches[0].clientY;pulling=true;}},{passive:true});
+  document.addEventListener('touchmove',e=>{if(!pulling)return;if(e.touches[0].clientY-startY>20&&window.scrollY===0){const ind=$('ptrIndicator');if(ind)ind.classList.add('show');}},{passive:true});
+  document.addEventListener('touchend',e=>{if(!pulling)return;pulling=false;const ind=$('ptrIndicator');if(ind)setTimeout(()=>ind.classList.remove('show'),1000);},{passive:true});
 })();
 
-// ── INICIALIZAÇÃO ─────────────────────────────────
-onAuthStateChanged(auth, async u => {
+// INIT
+onAuthStateChanged(auth,async u=>{
   if(u){
     user=u;
     const snap=await get(ref(db,`usuarios/${u.uid}`));
     userProfile=snap.val()||{nome:u.displayName||'Familiar'};
-    // avatar no topbar
     $('topAvatar').innerHTML=userProfile.foto?`<img src="${userProfile.foto}">`:(iniciais(userProfile.nome));
     $('authScreen').style.display='none';
     $('app').style.display='block';
-    renderFeed();
-    renderStoriesBar();
-  } else {
-    user=null; userProfile=null;
+    renderFeed();renderStoriesBar();
+  }else{
+    user=null;userProfile=null;
     $('authScreen').style.display='flex';
     $('app').style.display='none';
   }
 });
 </script>
 
-  <div id="btnInstalar" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
-    background:#3D2B1F;color:#fff;padding:10px 20px;border-radius:24px;font-size:13px;font-weight:600;
-    align-items:center;gap:8px;box-shadow:0 4px 16px rgba(61,43,31,.4);cursor:pointer;z-index:300;
-    white-space:nowrap;border:none;font-family:inherit" onclick="instalarApp()">
-    📲 Instalar o app
-  </div>
-
+<div id="btnInstalar" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+  background:#3D2B1F;color:#fff;padding:10px 20px;border-radius:24px;font-size:13px;font-weight:600;
+  align-items:center;gap:8px;box-shadow:0 4px 16px rgba(61,43,31,.4);cursor:pointer;z-index:300;
+  white-space:nowrap;border:none;font-family:inherit" onclick="instalarApp()">
+  📲 Instalar o app
+</div>
 <script>
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('sw.js').catch(e=>console.log('SW erro:',e));
-  });
-}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(e=>console.log('SW erro:',e));});}
 let deferredPrompt;
-window.addEventListener('beforeinstallprompt', e=>{
-  e.preventDefault();
-  deferredPrompt = e;
-  setTimeout(()=>{
-    if(deferredPrompt && document.getElementById('btnInstalar'))
-      document.getElementById('btnInstalar').style.display='flex';
-  }, 3000);
-});
-window.instalarApp=async()=>{
-  if(!deferredPrompt) return;
-  deferredPrompt.prompt();
-  await deferredPrompt.userChoice;
-  deferredPrompt=null;
-  document.getElementById('btnInstalar').style.display='none';
-};
-window.addEventListener('appinstalled',()=>{
-  const b=document.getElementById('btnInstalar'); if(b) b.style.display='none';
-});
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;setTimeout(()=>{if(deferredPrompt&&document.getElementById('btnInstalar'))document.getElementById('btnInstalar').style.display='flex';},3000);});
+window.instalarApp=async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;document.getElementById('btnInstalar').style.display='none';};
+window.addEventListener('appinstalled',()=>{const b=document.getElementById('btnInstalar');if(b)b.style.display='none';});
 </script>
 </body>
 </html>
