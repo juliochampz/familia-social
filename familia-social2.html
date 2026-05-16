@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Nossa Família</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --cream:#FAF7F2;--warm:#F5EDE0;--brown:#3D2B1F;--brown2:#6B4C3B;
+  --accent:#C8763A;--accent2:#E8A86A;--green:#4A7C59;--red:#C0392B;
+  --white:#FFFFFF;--gray:#8C7B72;--border:#E8DDD5;--shadow:rgba(61,43,31,.12);
+  --card:#FFFCF9;--overlay:rgba(61,43,31,.6);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--brown);min-height:100vh;overflow-x:hidden}
+
+/* ── AUTH ─────────────────────────────────────────── */
+#authScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:linear-gradient(145deg,#3D2B1F 0%,#6B4C3B 50%,#C8763A 100%)}
+.auth-card{background:var(--white);border-radius:24px;padding:40px 32px;width:100%;max-width:400px;
+  box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.auth-logo{text-align:center;margin-bottom:28px}
+.auth-logo .icon{font-size:48px;margin-bottom:8px}
+.auth-logo h1{font-family:'Playfair Display',serif;font-size:26px;color:var(--brown);letter-spacing:.3px}
+.auth-logo p{font-size:13px;color:var(--gray);margin-top:4px}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;background:#f3ede8;border-radius:12px;padding:3px;margin-bottom:24px}
+.auth-tab{padding:9px;border:none;background:none;border-radius:10px;font-size:13px;font-weight:500;
+  color:var(--gray);cursor:pointer;transition:all .2s}
+.auth-tab.active{background:var(--white);color:var(--brown);font-weight:600;box-shadow:0 2px 8px var(--shadow)}
+.form-group{margin-bottom:14px}
+.form-group label{font-size:12px;font-weight:600;color:var(--brown2);display:block;margin-bottom:5px;letter-spacing:.3px;text-transform:uppercase}
+.form-group input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;
+  font-size:14px;color:var(--brown);background:var(--cream);font-family:'DM Sans',sans-serif}
+.form-group input:focus{outline:none;border-color:var(--accent);background:var(--white)}
+.btn-auth{width:100%;padding:13px;background:var(--brown);color:var(--white);border:none;border-radius:12px;
+  font-size:15px;font-weight:600;cursor:pointer;margin-top:6px;font-family:'DM Sans',sans-serif;
+  transition:background .2s;letter-spacing:.2px}
+.btn-auth:hover{background:var(--accent)}
+.auth-note{font-size:11px;color:var(--gray);text-align:center;margin-top:12px;line-height:1.5}
+.auth-err{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 12px;
+  font-size:13px;color:var(--red);margin-bottom:14px;display:none}
+
+/* ── APP ─────────────────────────────────────────── */
+#app{display:none;min-height:100vh;padding-bottom:70px}
+
+/* TopBar */
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:12px 18px;
+  display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-title{font-family:'Playfair Display',serif;font-size:20px;color:var(--brown);font-weight:700}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.avatar-sm{width:34px;height:34px;border-radius:50%;background:var(--accent);color:var(--white);
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;
+  cursor:pointer;overflow:hidden;flex-shrink:0}
+.avatar-sm img{width:100%;height:100%;object-fit:cover}
+
+/* Bottom Nav */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--border);
+  display:grid;grid-template-columns:repeat(3,1fr);z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:10px 0;cursor:pointer;border:none;background:none;color:var(--gray);font-size:10px;
+  font-weight:500;gap:3px;transition:color .2s;font-family:'DM Sans',sans-serif}
+.nav-item.active{color:var(--accent)}
+.nav-item svg{width:22px;height:22px}
+
+/* ── FEED ─────────────────────────────────────────── */
+.feed{padding:12px 16px;max-width:500px;margin:0 auto}
+
+/* Post card */
+.post-card{background:var(--card);border-radius:20px;overflow:hidden;margin-bottom:16px;
+  box-shadow:0 2px 12px var(--shadow);border:1px solid var(--border)}
+.post-header{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.post-avatar{width:40px;height:40px;border-radius:50%;background:var(--accent2);color:var(--white);
+  display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;
+  flex-shrink:0;overflow:hidden}
+.post-avatar img{width:100%;height:100%;object-fit:cover}
+.post-meta{flex:1}
+.post-name{font-size:14px;font-weight:600;color:var(--brown)}
+.post-time{font-size:11px;color:var(--gray);margin-top:1px}
+.post-img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:#f0e8e0}
+.post-img-placeholder{width:100%;aspect-ratio:4/3;background:linear-gradient(135deg,#f0e8e0,#e8ddd5);
+  display:flex;align-items:center;justify-content:center;font-size:40px}
+.post-body{padding:12px 14px}
+.post-text{font-size:14px;color:var(--brown2);line-height:1.55;margin-bottom:10px}
+.post-text:empty{display:none}
+.post-actions{display:flex;align-items:center;gap:14px;padding:0 14px 12px}
+.btn-action{display:flex;align-items:center;gap:5px;border:none;background:none;cursor:pointer;
+  color:var(--gray);font-size:13px;font-weight:500;padding:6px 0;font-family:'DM Sans',sans-serif}
+.btn-action.liked{color:var(--red)}
+.btn-action svg{width:20px;height:20px}
+.btn-action.liked svg{fill:var(--red)}
+.comments-section{border-top:1px solid var(--border);padding:10px 14px}
+.comment{display:flex;gap:8px;margin-bottom:8px}
+.comment-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent2);color:var(--white);
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;
+  flex-shrink:0;overflow:hidden}
+.comment-avatar img{width:100%;height:100%;object-fit:cover}
+.comment-bubble{background:#f5ede0;border-radius:12px;padding:6px 10px;flex:1}
+.comment-name{font-size:11px;font-weight:600;color:var(--brown);margin-bottom:2px}
+.comment-text{font-size:13px;color:var(--brown2)}
+.comment-input-row{display:flex;gap:8px;align-items:center;margin-top:8px}
+.comment-input{flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:20px;
+  font-size:13px;color:var(--brown);background:var(--cream);font-family:'DM Sans',sans-serif}
+.comment-input:focus{outline:none;border-color:var(--accent)}
+.btn-send{width:32px;height:32px;border-radius:50%;background:var(--accent);color:var(--white);
+  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.btn-send svg{width:14px;height:14px}
+
+/* ── NOVO POST ────────────────────────────────────── */
+.btn-new-post{position:fixed;bottom:80px;right:20px;width:54px;height:54px;border-radius:50%;
+  background:var(--brown);color:var(--white);border:none;cursor:pointer;font-size:26px;
+  box-shadow:0 4px 16px rgba(61,43,31,.4);display:flex;align-items:center;justify-content:center;
+  transition:transform .2s,background .2s;z-index:99}
+.btn-new-post:hover{background:var(--accent);transform:scale(1.08)}
+
+/* ── MODAL ────────────────────────────────────────── */
+.modal-overlay{display:none;position:fixed;inset:0;background:var(--overlay);z-index:200;
+  align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:24px 24px 0 0;padding:20px;width:100%;
+  max-width:500px;max-height:90vh;overflow-y:auto}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.modal-hdr h3{font-family:'Playfair Display',serif;font-size:19px;color:var(--brown)}
+.btn-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray);padding:4px}
+.upload-area{border:2px dashed var(--border);border-radius:16px;padding:28px;text-align:center;
+  cursor:pointer;margin-bottom:14px;background:var(--cream);transition:border-color .2s}
+.upload-area:hover{border-color:var(--accent)}
+.upload-area .icon{font-size:36px;margin-bottom:8px}
+.upload-area p{font-size:13px;color:var(--gray)}
+.upload-preview{width:100%;border-radius:16px;overflow:hidden;margin-bottom:14px;
+  aspect-ratio:4/3;position:relative}
+.upload-preview img{width:100%;height:100%;object-fit:cover}
+.upload-preview .remove-img{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.5);
+  color:#fff;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:14px}
+textarea{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;
+  font-size:14px;color:var(--brown);background:var(--cream);resize:none;
+  font-family:'DM Sans',sans-serif;min-height:90px}
+textarea:focus{outline:none;border-color:var(--accent)}
+.btn-post{width:100%;padding:13px;background:var(--brown);color:var(--white);border:none;
+  border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px;
+  font-family:'DM Sans',sans-serif;transition:background .2s}
+.btn-post:hover{background:var(--accent)}
+.btn-post:disabled{opacity:.5;cursor:not-allowed}
+
+/* ── PERFIL ────────────────────────────────────────── */
+.profile-page{padding:16px;max-width:500px;margin:0 auto}
+.profile-header{background:var(--card);border-radius:20px;padding:24px;text-align:center;
+  margin-bottom:16px;border:1px solid var(--border);box-shadow:0 2px 12px var(--shadow)}
+.profile-avatar{width:80px;height:80px;border-radius:50%;background:var(--accent);color:var(--white);
+  display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;
+  margin:0 auto 12px;overflow:hidden;cursor:pointer;border:3px solid var(--accent2)}
+.profile-avatar img{width:100%;height:100%;object-fit:cover}
+.profile-name{font-family:'Playfair Display',serif;font-size:20px;color:var(--brown);margin-bottom:4px}
+.profile-email{font-size:13px;color:var(--gray);margin-bottom:16px}
+.profile-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.stat-card{background:var(--cream);border-radius:12px;padding:12px;text-align:center}
+.stat-num{font-size:22px;font-weight:700;color:var(--brown)}
+.stat-lbl{font-size:11px;color:var(--gray);margin-top:2px}
+.btn-outline{width:100%;padding:11px;border:1.5px solid var(--brown);color:var(--brown);
+  background:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:all .2s;margin-bottom:10px}
+.btn-outline:hover{background:var(--brown);color:var(--white)}
+.btn-danger{border-color:var(--red);color:var(--red)}
+.btn-danger:hover{background:var(--red);color:var(--white)}
+
+/* ── MEMBROS ────────────────────────────────────────── */
+.members-page{padding:16px;max-width:500px;margin:0 auto}
+.member-card{background:var(--card);border-radius:16px;padding:14px;display:flex;
+  align-items:center;gap:12px;margin-bottom:10px;border:1px solid var(--border)}
+.member-info{flex:1}
+.member-name{font-size:14px;font-weight:600;color:var(--brown)}
+.member-email{font-size:12px;color:var(--gray);margin-top:2px}
+.member-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
+.member-badge.admin{background:#fef3c7;color:#92400e}
+
+/* ── LOADING ────────────────────────────────────────── */
+.loading{text-align:center;padding:40px;color:var(--gray)}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);
+  border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:48px 20px;color:var(--gray)}
+.empty-icon{font-size:48px;margin-bottom:12px}
+.empty p{font-size:14px;line-height:1.5}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="authScreen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="icon">🌿</div>
+      <h1>Nossa Família</h1>
+      <p>Um espaço só nosso</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')">Entrar</button>
+      <button class="auth-tab" onclick="switchTab('cadastro')">Cadastrar</button>
+    </div>
+    <div class="auth-err" id="authErr"></div>
+
+    <!-- Login -->
+    <div id="tabLogin">
+      <div class="form-group"><label>E-mail</label><input id="lEmail" type="email" placeholder="seu@email.com"></div>
+      <div class="form-group"><label>Senha</label><input id="lSenha" type="password" placeholder="••••••••"></div>
+      <button class="btn-auth" onclick="fazerLogin()">Entrar →</button>
+      <p class="auth-note">Só membros da família têm acesso.</p>
+    </div>
+
+    <!-- Cadastro -->
+    <div id="tabCadastro" style="display:none">
+      <div class="form-group"><label>Código de convite</label><input id="cCodigo" placeholder="Digite o código secreto"></div>
+      <div class="form-group"><label>Seu nome</label><input id="cNome" placeholder="Como quer ser chamado(a)"></div>
+      <div class="form-group"><label>E-mail</label><input id="cEmail" type="email" placeholder="seu@email.com"></div>
+      <div class="form-group"><label>Senha</label><input id="cSenha" type="password" placeholder="Mínimo 6 caracteres"></div>
+      <button class="btn-auth" onclick="fazerCadastro()">Criar conta →</button>
+      <p class="auth-note">Precisa do código de convite para entrar.<br>Peça ao administrador da família.</p>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <span class="topbar-title">🌿 Nossa Família</span>
+    <div class="topbar-right">
+      <div class="avatar-sm" id="topAvatar" onclick="showPage('perfil')"></div>
+    </div>
+  </div>
+
+  <!-- FEED -->
+  <div id="pageFeed" class="feed">
+    <div class="loading"><div class="spinner"></div>Carregando...</div>
+  </div>
+
+  <!-- PERFIL -->
+  <div id="pagePerfil" class="profile-page" style="display:none">
+    <div class="profile-header">
+      <div class="profile-avatar" id="profileAvatar" onclick="document.getElementById('avatarInput').click()"></div>
+      <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="uploadAvatar(event)">
+      <div class="profile-name" id="profileName">—</div>
+      <div class="profile-email" id="profileEmail">—</div>
+      <div class="profile-stats">
+        <div class="stat-card"><div class="stat-num" id="statPosts">0</div><div class="stat-lbl">publicações</div></div>
+        <div class="stat-card"><div class="stat-num" id="statLikes">0</div><div class="stat-lbl">curtidas recebidas</div></div>
+      </div>
+      <button class="btn-outline" onclick="showPage('membros')">👨‍👩‍👧‍👦 Ver membros da família</button>
+      <button class="btn-outline btn-danger" onclick="sair()">Sair</button>
+    </div>
+  </div>
+
+  <!-- MEMBROS -->
+  <div id="pageMembros" class="members-page" style="display:none">
+    <h3 style="font-family:'Playfair Display',serif;font-size:19px;color:var(--brown);margin-bottom:14px">Membros da família</h3>
+    <div id="listaMembros"><div class="loading"><div class="spinner"></div></div></div>
+    <button class="btn-outline" style="margin-top:8px" onclick="showPage('perfil')">← Voltar</button>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-item active" id="navFeed" onclick="showPage('feed')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Feed
+    </button>
+    <button class="nav-item" id="navNovo" onclick="abrirModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+      Publicar
+    </button>
+    <button class="nav-item" id="navPerfil" onclick="showPage('perfil')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Perfil
+    </button>
+  </div>
+</div>
+
+<!-- MODAL NOVO POST -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)fecharModal()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3>Nova publicação</h3>
+      <button class="btn-close" onclick="fecharModal()">✕</button>
+    </div>
+    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fotoInput').click()">
+      <div class="icon">📷</div>
+      <p>Toque para adicionar uma foto<br><small style="color:#bbb">(opcional)</small></p>
+    </div>
+    <div class="upload-preview" id="uploadPreview" style="display:none">
+      <img id="previewImg" src="">
+      <button class="remove-img" onclick="removerFoto()">✕</button>
+    </div>
+    <input type="file" id="fotoInput" accept="image/*" style="display:none" onchange="previewFoto(event)">
+    <textarea id="postTexto" placeholder="O que você quer compartilhar com a família? 💚"></textarea>
+    <button class="btn-post" id="btnPost" onclick="publicar()">Publicar 🌿</button>
+  </div>
+</div>
+
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,updateProfile}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import{getDatabase,ref,push,set,get,onValue,query,orderByChild,limitToLast,update,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+// ── CONFIG ────────────────────────────────────────
+const CFG={
+  apiKey:'AIzaSyC54FUgmARdcGjy1tOVNerFMPvcBL921MI',
+  authDomain:'despesas-c2f24.firebaseapp.com',
+  databaseURL:'https://despesas-c2f24-default-rtdb.firebaseio.com',
+  projectId:'despesas-c2f24',
+};
+const CODIGO_CONVITE='FAMILIA2025';
+
+// ── CLOUDINARY ────────────────────────────────────
+const CLOUD_NAME   = 'du6dxasku';
+const UPLOAD_PRESET= 'familia_social';
+
+async function uploadImagem(file){
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', UPLOAD_PRESET);
+  fd.append('folder','familia_social');
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,{method:'POST',body:fd});
+  const data = await res.json();
+  if(!data.secure_url) throw new Error('Erro no upload');
+  return data.secure_url;
+} // ← mude aqui para o seu código secreto
+
+const app  = initializeApp(CFG);
+const auth = getAuth(app);
+const db   = getDatabase(app);
+
+// ── ESTADO ────────────────────────────────────────
+let user=null, userProfile=null, fotoFile=null;
+
+const $ = id => document.getElementById(id);
+const fmtTempo = ts => {
+  if(!ts) return '';
+  const d = new Date(ts), now = new Date();
+  const diff = Math.floor((now-d)/1000);
+  if(diff<60) return 'agora mesmo';
+  if(diff<3600) return `${Math.floor(diff/60)}min`;
+  if(diff<86400) return `${Math.floor(diff/3600)}h`;
+  return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+};
+const iniciais = nome => (nome||'?').split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);
+const avatarEl = (nome, fotoUrl, cls='post-avatar') =>
+  fotoUrl ? `<div class="${cls}"><img src="${fotoUrl}" alt="${nome}"></div>`
+           : `<div class="${cls}">${iniciais(nome)}</div>`;
+
+// ── AUTH ──────────────────────────────────────────
+window.switchTab = t => {
+  $('tabLogin').style.display    = t==='login'?'':'none';
+  $('tabCadastro').style.display = t==='cadastro'?'':'none';
+  document.querySelectorAll('.auth-tab').forEach((b,i)=>b.classList.toggle('active',(t==='login'&&i===0)||(t==='cadastro'&&i===1)));
+  $('authErr').style.display='none';
+};
+
+function showErr(msg){ $('authErr').textContent=msg; $('authErr').style.display='block'; }
+
+window.fazerLogin = async() => {
+  const email=$('lEmail').value.trim(), senha=$('lSenha').value;
+  if(!email||!senha){showErr('Preencha e-mail e senha');return;}
+  try{
+    await signInWithEmailAndPassword(auth,email,senha);
+  }catch(e){
+    showErr(e.code==='auth/user-not-found'||e.code==='auth/wrong-password'?'E-mail ou senha incorretos':'Erro ao entrar. Tente novamente.');
+  }
+};
+
+window.fazerCadastro = async() => {
+  const codigo=$('cCodigo').value.trim();
+  if(codigo.toUpperCase()!==CODIGO_CONVITE.toUpperCase()){showErr('Código de convite inválido.');return;}
+  const nome=$('cNome').value.trim(), email=$('cEmail').value.trim(), senha=$('cSenha').value;
+  if(!nome||!email||!senha){showErr('Preencha todos os campos');return;}
+  if(senha.length<6){showErr('Senha deve ter ao menos 6 caracteres');return;}
+  try{
+    const cred = await createUserWithEmailAndPassword(auth,email,senha);
+    await updateProfile(cred.user,{displayName:nome});
+    await set(ref(db,`usuarios/${cred.user.uid}`),{nome,email,uid:cred.user.uid,entrou:Date.now()});
+  }catch(e){
+    showErr(e.code==='auth/email-already-in-use'?'Este e-mail já está cadastrado':'Erro ao criar conta.');
+  }
+};
+
+window.sair = async() => { if(confirm('Sair da família?')) await signOut(auth); };
+
+// ── NAVIGATION ────────────────────────────────────
+window.showPage = p => {
+  ['Feed','Perfil','Membros'].forEach(n=>$(('page'+n)).style.display='none');
+  $('page'+p.charAt(0).toUpperCase()+p.slice(1)).style.display='';
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  const navMap={feed:'navFeed',perfil:'navPerfil'};
+  if(navMap[p]) $(navMap[p]).classList.add('active');
+  if(p==='perfil') renderPerfil();
+  if(p==='membros') renderMembros();
+};
+
+// ── FEED ──────────────────────────────────────────
+function renderFeed(){
+  const feedEl = $('pageFeed');
+  const postsRef = query(ref(db,'posts'),orderByChild('ts'),limitToLast(50));
+  onValue(postsRef, snap => {
+    const posts = [];
+    snap.forEach(c => posts.unshift({id:c.key,...c.val()}));
+    if(!posts.length){
+      feedEl.innerHTML=`<div class="empty"><div class="empty-icon">🌿</div><p>Nenhuma publicação ainda.<br>Seja o primeiro a compartilhar!</p></div>`;
+      return;
+    }
+    feedEl.innerHTML = posts.map(p => renderPost(p)).join('');
+  });
+}
+
+function renderPost(p){
+  const liked = p.curtidas&&p.curtidas[user.uid];
+  const nLikes = p.curtidas ? Object.keys(p.curtidas).length : 0;
+  const comments = p.comentarios ? Object.values(p.comentarios) : [];
+  const commentsHtml = comments.map(c=>`
+    <div class="comment">
+      ${avatarEl(c.nome,c.foto,'comment-avatar')}
+      <div class="comment-bubble">
+        <div class="comment-name">${c.nome}</div>
+        <div class="comment-text">${c.texto}</div>
+      </div>
+    </div>`).join('');
+  const imgHtml = p.foto
+    ? `<img class="post-img" src="${p.foto}" loading="lazy" alt="foto">`
+    : '';
+  return `
+  <div class="post-card" id="post-${p.id}">
+    <div class="post-header">
+      ${avatarEl(p.autorNome, p.autorFoto)}
+      <div class="post-meta">
+        <div class="post-name">${p.autorNome||'Familiar'}</div>
+        <div class="post-time">${fmtTempo(p.ts)}</div>
+      </div>
+    </div>
+    ${imgHtml}
+    ${p.texto?`<div class="post-body"><div class="post-text">${p.texto}</div></div>`:''}
+    <div class="post-actions">
+      <button class="btn-action${liked?' liked':''}" onclick="curtir('${p.id}')">
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="${liked?'currentColor':'none'}"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        ${nLikes>0?nLikes:''}
+      </button>
+      <button class="btn-action" onclick="focarComentario('${p.id}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        ${comments.length>0?comments.length:''}
+      </button>
+    </div>
+    <div class="comments-section">
+      <div id="comments-${p.id}">${commentsHtml}</div>
+      <div class="comment-input-row">
+        ${avatarEl(userProfile?.nome||'', userProfile?.foto||'', 'comment-avatar')}
+        <input class="comment-input" id="ci-${p.id}" placeholder="Comentar..." onkeydown="if(event.key==='Enter')enviarComentario('${p.id}')">
+        <button class="btn-send" onclick="enviarComentario('${p.id}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+window.curtir = async id => {
+  const r = ref(db,`posts/${id}/curtidas/${user.uid}`);
+  const snap = await get(r);
+  if(snap.exists()) await set(r,null); else await set(r,true);
+};
+
+window.focarComentario = id => { const el=$(`ci-${id}`); if(el){el.focus();el.scrollIntoView({behavior:'smooth',block:'center'});} };
+
+window.enviarComentario = async id => {
+  const el=$(`ci-${id}`); if(!el||!el.value.trim()) return;
+  await push(ref(db,`posts/${id}/comentarios`),{
+    texto:el.value.trim(), uid:user.uid,
+    nome:userProfile?.nome||user.displayName||'Familiar',
+    foto:userProfile?.foto||null, ts:Date.now()
+  });
+  el.value='';
+};
+
+// ── NOVO POST ─────────────────────────────────────
+window.abrirModal = () => { $('modalOverlay').classList.add('open'); $('postTexto').focus(); };
+window.fecharModal = () => { $('modalOverlay').classList.remove('open'); fotoFile=null; $('uploadPreview').style.display='none'; $('uploadArea').style.display=''; $('postTexto').value=''; };
+
+window.previewFoto = e => {
+  fotoFile = e.target.files[0];
+  if(!fotoFile) return;
+  const url = URL.createObjectURL(fotoFile);
+  $('previewImg').src=url; $('uploadPreview').style.display=''; $('uploadArea').style.display='none';
+};
+window.removerFoto = () => { fotoFile=null; $('uploadPreview').style.display='none'; $('uploadArea').style.display=''; $('fotoInput').value=''; };
+
+window.publicar = async() => {
+  const texto=$('postTexto').value.trim();
+  if(!texto&&!fotoFile){alert('Adicione uma foto ou texto.');return;}
+  const btn=$('btnPost'); btn.disabled=true; btn.textContent='Publicando...';
+  try{
+    let fotoUrl=null;
+    if(fotoFile){
+      fotoUrl = await uploadImagem(fotoFile);
+    }
+    await push(ref(db,'posts'),{
+      texto, foto:fotoUrl,
+      autorUid:user.uid,
+      autorNome:userProfile?.nome||user.displayName||'Familiar',
+      autorFoto:userProfile?.foto||null,
+      ts:Date.now()
+    });
+    fecharModal();
+  }catch(e){ alert('Erro ao publicar. Tente novamente.'); }
+  btn.disabled=false; btn.textContent='Publicar 🌿';
+};
+
+// ── PERFIL ────────────────────────────────────────
+async function renderPerfil(){
+  const snap = await get(ref(db,`usuarios/${user.uid}`));
+  const p = snap.val()||{};
+  $('profileName').textContent=p.nome||user.displayName||'—';
+  $('profileEmail').textContent=user.email;
+  $('profileAvatar').innerHTML=p.foto?`<img src="${p.foto}">`:(iniciais(p.nome||'?'));
+
+  // Stats
+  const postsSnap=await get(ref(db,'posts'));
+  let myPosts=0,myLikes=0;
+  postsSnap.forEach(c=>{
+    const post=c.val();
+    if(post.autorUid===user.uid){myPosts++;if(post.curtidas)myLikes+=Object.keys(post.curtidas).length;}
+  });
+  $('statPosts').textContent=myPosts;
+  $('statLikes').textContent=myLikes;
+}
+
+window.uploadAvatar = async e => {
+  const file=e.target.files[0]; if(!file) return;
+  try{
+    const url=await uploadImagem(file);
+    await update(ref(db,`usuarios/${user.uid}`),{foto:url});
+    userProfile={...userProfile,foto:url};
+    $('profileAvatar').innerHTML=`<img src="${url}">`;
+    $('topAvatar').innerHTML=`<img src="${url}">`;
+  }catch(e){alert('Erro ao enviar foto.');}
+};
+
+// ── MEMBROS ───────────────────────────────────────
+async function renderMembros(){
+  const snap=await get(ref(db,'usuarios'));
+  const el=$('listaMembros'); el.innerHTML='';
+  snap.forEach(c=>{
+    const m=c.val();
+    el.innerHTML+=`<div class="member-card">
+      ${avatarEl(m.nome,m.foto)}
+      <div class="member-info">
+        <div class="member-name">${m.nome}</div>
+        <div class="member-email">${m.email}</div>
+      </div>
+    </div>`;
+  });
+}
+
+// ── INICIALIZAÇÃO ─────────────────────────────────
+onAuthStateChanged(auth, async u => {
+  if(u){
+    user=u;
+    const snap=await get(ref(db,`usuarios/${u.uid}`));
+    userProfile=snap.val()||{nome:u.displayName||'Familiar'};
+    // avatar no topbar
+    $('topAvatar').innerHTML=userProfile.foto?`<img src="${userProfile.foto}">`:(iniciais(userProfile.nome));
+    $('authScreen').style.display='none';
+    $('app').style.display='block';
+    renderFeed();
+  } else {
+    user=null; userProfile=null;
+    $('authScreen').style.display='flex';
+    $('app').style.display='none';
+  }
+});
+</script>
+</body>
+</html>
