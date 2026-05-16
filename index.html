@@ -243,7 +243,7 @@ textarea:focus{outline:none;border-color:var(--accent)}
 <div id="authScreen">
   <div class="auth-card">
     <div class="auth-logo">
-      <div class="icon">🌿</div>
+      <div class="icon">🦫</div>
       <h1>Nossa Família</h1>
       <p>Um espaço só nosso</p>
     </div>
@@ -276,7 +276,7 @@ textarea:focus{outline:none;border-color:var(--accent)}
 <!-- APP -->
 <div id="app">
   <div class="topbar">
-    <span class="topbar-title">🌿 Nossa Família</span>
+    <span class="topbar-title">🦫 Nossa Família</span>
     <div class="topbar-right">
       <div class="avatar-sm" id="topAvatar" onclick="showPage('perfil')"></div>
     </div>
@@ -365,7 +365,7 @@ textarea:focus{outline:none;border-color:var(--accent)}
     </div>
     <input type="file" id="fotoInput" accept="image/*" style="display:none" onchange="previewFoto(event)">
     <textarea id="postTexto" placeholder="O que você quer compartilhar com a família? 💚"></textarea>
-    <button class="btn-post" id="btnPost" onclick="publicar()">Publicar 🌿</button>
+    <button class="btn-post" id="btnPost" onclick="publicar()">Publicar 🦫</button>
   </div>
 </div>
 
@@ -611,7 +611,7 @@ function renderFeed(){
     const posts = [];
     snap.forEach(c => posts.unshift({id:c.key,...c.val()}));
     if(!posts.length){
-      feedEl.innerHTML=`<div class="empty"><div class="empty-icon">🌿</div><p>Nenhuma publicação ainda.<br>Seja o primeiro a compartilhar!</p></div>`;
+      feedEl.innerHTML=`<div class="empty"><div class="empty-icon">🦫</div><p>Nenhuma publicação ainda.<br>Seja o primeiro a compartilhar!</p></div>`;
       return;
     }
     feedEl.innerHTML = posts.map(p => renderPost(p)).join('');
@@ -715,7 +715,7 @@ window.publicar = async() => {
     });
     fecharModal();
   }catch(e){ alert('Erro ao publicar. Tente novamente.'); }
-  btn.disabled=false; btn.textContent='Publicar 🌿';
+  btn.disabled=false; btn.textContent='Publicar 🦫';
 };
 
 // ── PERFIL ────────────────────────────────────────
