@@ -182,6 +182,59 @@ textarea:focus{outline:none;border-color:var(--accent)}
 .empty{text-align:center;padding:48px 20px;color:var(--gray)}
 .empty-icon{font-size:48px;margin-bottom:12px}
 .empty p{font-size:14px;line-height:1.5}
+
+/* ── STORIES ─────────────────────────────────────── */
+.stories-bar{display:flex;gap:12px;padding:14px 16px;overflow-x:auto;scrollbar-width:none;
+  background:var(--white);border-bottom:1px solid var(--border)}
+.stories-bar::-webkit-scrollbar{display:none}
+.story-item{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;flex-shrink:0}
+.story-ring{width:60px;height:60px;border-radius:50%;padding:2px;
+  background:linear-gradient(135deg,#C8763A,#E8A86A,#4A7C59);position:relative}
+.story-ring.visto{background:linear-gradient(135deg,#ccc,#ddd)}
+.story-ring.add{background:var(--cream);border:2px dashed var(--border)}
+.story-avatar{width:100%;height:100%;border-radius:50%;background:var(--accent2);
+  color:var(--white);display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:700;border:2px solid var(--white);overflow:hidden}
+.story-avatar img{width:100%;height:100%;object-fit:cover}
+.story-name{font-size:10px;color:var(--brown2);max-width:64px;text-align:center;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.story-add-btn{width:20px;height:20px;background:var(--accent);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;
+  position:absolute;bottom:0;right:0;border:2px solid var(--white)}
+
+/* Story viewer */
+.story-viewer{display:none;position:fixed;inset:0;background:#000;z-index:500;flex-direction:column}
+.story-viewer.open{display:flex}
+.story-progress{display:flex;gap:3px;padding:10px 12px 6px;position:absolute;top:0;left:0;right:0;z-index:2}
+.story-prog-bar{height:3px;background:rgba(255,255,255,.35);border-radius:2px;flex:1;overflow:hidden}
+.story-prog-fill{height:100%;background:#fff;width:0%;transition:width linear}
+.story-top{position:absolute;top:18px;left:12px;right:12px;display:flex;align-items:center;
+  gap:10px;z-index:2;padding-top:14px}
+.story-top-avatar{width:36px;height:36px;border-radius:50%;border:2px solid #fff;overflow:hidden;background:var(--accent)}
+.story-top-avatar img{width:100%;height:100%;object-fit:cover}
+.story-top-name{color:#fff;font-size:14px;font-weight:600;flex:1}
+.story-top-time{color:rgba(255,255,255,.7);font-size:11px}
+.story-close{color:#fff;background:none;border:none;font-size:24px;cursor:pointer;padding:4px}
+.story-img{width:100%;height:100%;object-fit:contain}
+.story-tap-prev{position:absolute;left:0;top:0;width:35%;height:100%;z-index:1}
+.story-tap-next{position:absolute;right:0;top:0;width:65%;height:100%;z-index:1}
+.story-text-overlay{position:absolute;bottom:30px;left:16px;right:16px;z-index:2;
+  color:#fff;font-size:15px;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,.8);
+  background:rgba(0,0,0,.25);border-radius:12px;padding:10px 14px}
+
+/* ── REAÇÕES ─────────────────────────────────────── */
+.reacoes-wrap{position:relative;display:inline-flex;align-items:center}
+.reacoes-picker{display:none;position:absolute;bottom:36px;left:0;background:var(--white);
+  border-radius:20px;padding:8px 10px;box-shadow:0 4px 20px rgba(0,0,0,.15);
+  flex-direction:row;gap:4px;white-space:nowrap;border:1px solid var(--border);z-index:50}
+.reacoes-picker.open{display:flex}
+.reacao-opt{font-size:24px;cursor:pointer;padding:2px 4px;border-radius:8px;
+  transition:transform .15s;line-height:1;border:none;background:none}
+.reacao-opt:hover{transform:scale(1.3)}
+.reacoes-bar{display:flex;flex-wrap:wrap;gap:4px;padding:0 14px 8px;font-size:13px}
+.reacao-count{display:flex;align-items:center;gap:3px;background:var(--cream);
+  border-radius:12px;padding:2px 8px;font-size:12px;cursor:pointer;border:1px solid var(--border)}
+.reacao-count.minha{border-color:var(--accent);background:#fff5ed}
 </style>
 </head>
 <body>
@@ -229,6 +282,28 @@ textarea:focus{outline:none;border-color:var(--accent)}
     </div>
   </div>
 
+
+  <!-- STORIES -->
+  <div class="stories-bar" id="storiesBar">
+    <div class="loading" style="padding:10px"><div class="spinner" style="width:20px;height:20px;margin:0"></div></div>
+  </div>
+
+  <!-- STORY VIEWER -->
+  <div class="story-viewer" id="storyViewer">
+    <div class="story-progress" id="storyProgress"></div>
+    <div class="story-top">
+      <div class="story-top-avatar" id="storyAvatar"></div>
+      <div style="flex:1">
+        <div class="story-top-name" id="storyName"></div>
+        <div class="story-top-time" id="storyTime"></div>
+      </div>
+      <button class="story-close" onclick="fecharStory()">✕</button>
+    </div>
+    <img class="story-img" id="storyImg" src="">
+    <div class="story-text-overlay" id="storyTextOverlay" style="display:none"></div>
+    <div class="story-tap-prev" onclick="prevStory()"></div>
+    <div class="story-tap-next" onclick="nextStory()"></div>
+  </div>
   <!-- FEED -->
   <div id="pageFeed" class="feed">
     <div class="loading"><div class="spinner"></div>Carregando...</div>
@@ -393,6 +468,141 @@ window.showPage = p => {
   if(p==='membros') renderMembros();
 };
 
+
+// ── REAÇÕES ───────────────────────────────────────
+function renderReacoesBar(p){
+  if(!p.reacoes) return '';
+  const counts={};
+  Object.values(p.reacoes).forEach(r=>{ counts[r.emoji]=(counts[r.emoji]||0)+1; });
+  const minhaReacao=p.reacoes[user?.uid]?.emoji;
+  return Object.entries(counts).map(([emoji,n])=>
+    `<span class="reacao-count${emoji===minhaReacao?' minha':''}" onclick="reagir('${p.id}','${emoji}')">${emoji} ${n}</span>`
+  ).join('');
+}
+
+window.togglePicker=id=>{
+  const el=$('rp-'+id);
+  el.classList.toggle('open');
+};
+window.closePicker=id=>{ const el=$('rp-'+id); if(el) el.classList.remove('open'); };
+window.reagir=async(id,emoji)=>{
+  closePicker(id);
+  const r=ref(db,`posts/${id}/reacoes/${user.uid}`);
+  const snap=await get(r);
+  if(snap.exists()&&snap.val().emoji===emoji){ await set(r,null); }
+  else{ await set(r,{emoji,uid:user.uid,nome:userProfile?.nome||'Familiar'}); }
+};
+
+// ── STORIES ───────────────────────────────────────
+let storiesData=[], storiesGrouped=[], currentGroupIdx=0, currentStoryIdx=0, storyTimer=null;
+const STORY_DURATION=5000;
+
+function renderStoriesBar(){
+  onValue(ref(db,'stories'), snap=>{
+    storiesData=[]; storiesGrouped=[];
+    const now=Date.now();
+    snap.forEach(c=>{ const s={id:c.key,...c.val()}; if(now-s.ts<86400000) storiesData.push(s); });
+    // Agrupar por usuário
+    const byUser={};
+    storiesData.forEach(s=>{
+      if(!byUser[s.uid]) byUser[s.uid]={uid:s.uid,nome:s.nome,foto:s.foto,stories:[]};
+      byUser[s.uid].stories.push(s);
+    });
+    storiesGrouped=Object.values(byUser);
+    const bar=$('storiesBar');
+    const vistos=JSON.parse(localStorage.getItem('storiesVistos')||'{}');
+    // Botão "Adicionar story" sempre primeiro
+    let html=`<div class="story-item" onclick="document.getElementById('storyInput').click()">
+      <div class="story-ring add" style="background:none">
+        <div class="story-avatar" style="background:var(--cream);border:2px dashed var(--border)">
+          <span style="font-size:24px;color:var(--accent)">+</span>
+        </div>
+      </div>
+      <span class="story-name">Seu story</span>
+    </div>`;
+    storiesGrouped.forEach((g,gi)=>{
+      const visto=g.stories.every(s=>vistos[s.id]);
+      html+=`<div class="story-item" onclick="abrirStory(${gi})">
+        <div class="story-ring${visto?' visto':''}">
+          ${g.foto?`<div class="story-avatar"><img src="${g.foto}"></div>`
+            :`<div class="story-avatar">${iniciais(g.nome)}</div>`}
+        </div>
+        <span class="story-name">${g.nome.split(' ')[0]}</span>
+      </div>`;
+    });
+    bar.innerHTML=html+'<input type="file" id="storyInput" accept="image/*" style="display:none" onchange="publicarStory(event)">';
+  });
+}
+
+window.publicarStory=async e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const btn=document.createElement('div');
+  try{
+    const url=await uploadImagem(file);
+    await push(ref(db,'stories'),{
+      uid:user.uid, nome:userProfile?.nome||'Familiar',
+      foto:userProfile?.foto||null, img:url, ts:Date.now()
+    });
+  }catch(err){ alert('Erro ao publicar story'); }
+  e.target.value='';
+};
+
+window.abrirStory=(gi)=>{
+  currentGroupIdx=gi; currentStoryIdx=0;
+  $('storyViewer').classList.add('open');
+  mostrarStoryAtual();
+};
+
+function mostrarStoryAtual(){
+  clearTimeout(storyTimer);
+  const grupo=storiesGrouped[currentGroupIdx];
+  if(!grupo) return fecharStory();
+  const story=grupo.stories[currentStoryIdx];
+  if(!story) return fecharStory();
+  // Marcar como visto
+  const vistos=JSON.parse(localStorage.getItem('storiesVistos')||'{}');
+  vistos[story.id]=true;
+  localStorage.setItem('storiesVistos',JSON.stringify(vistos));
+  // UI
+  $('storyImg').src=story.img||'';
+  $('storyName').textContent=grupo.nome;
+  $('storyTime').textContent=fmtTempo(story.ts);
+  const av=$('storyAvatar');
+  av.innerHTML=grupo.foto?`<img src="${grupo.foto}">`:'<span style="color:#fff;font-weight:700">'+iniciais(grupo.nome)+'</span>';
+  if(story.texto){ $('storyTextOverlay').textContent=story.texto; $('storyTextOverlay').style.display=''; }
+  else $('storyTextOverlay').style.display='none';
+  // Progress bars
+  const bars=grupo.stories.map((_,i)=>`<div class="story-prog-bar"><div class="story-prog-fill" id="spf-${i}"></div></div>`).join('');
+  $('storyProgress').innerHTML=bars;
+  // Preencher barras anteriores
+  for(let i=0;i<currentStoryIdx;i++){
+    const el=$('spf-'+i); if(el) el.style.width='100%';
+  }
+  // Animar barra atual
+  const fill=$('spf-'+currentStoryIdx);
+  if(fill){ setTimeout(()=>{ fill.style.transitionDuration=STORY_DURATION+'ms'; fill.style.width='100%'; },50); }
+  storyTimer=setTimeout(nextStory, STORY_DURATION);
+}
+
+window.nextStory=()=>{
+  const grupo=storiesGrouped[currentGroupIdx];
+  if(!grupo) return fecharStory();
+  if(currentStoryIdx<grupo.stories.length-1){ currentStoryIdx++; mostrarStoryAtual(); }
+  else if(currentGroupIdx<storiesGrouped.length-1){ currentGroupIdx++; currentStoryIdx=0; mostrarStoryAtual(); }
+  else fecharStory();
+};
+
+window.prevStory=()=>{
+  if(currentStoryIdx>0){ currentStoryIdx--; mostrarStoryAtual(); }
+  else if(currentGroupIdx>0){ currentGroupIdx--; currentStoryIdx=0; mostrarStoryAtual(); }
+};
+
+window.fecharStory=()=>{
+  clearTimeout(storyTimer);
+  $('storyViewer').classList.remove('open');
+  renderStoriesBar();
+};
+
 // ── FEED ──────────────────────────────────────────
 function renderFeed(){
   const feedEl = $('pageFeed');
@@ -409,8 +619,6 @@ function renderFeed(){
 }
 
 function renderPost(p){
-  const liked = p.curtidas&&p.curtidas[user.uid];
-  const nLikes = p.curtidas ? Object.keys(p.curtidas).length : 0;
   const comments = p.comentarios ? Object.values(p.comentarios) : [];
   const commentsHtml = comments.map(c=>`
     <div class="comment">
@@ -434,11 +642,17 @@ function renderPost(p){
     </div>
     ${imgHtml}
     ${p.texto?`<div class="post-body"><div class="post-text">${p.texto}</div></div>`:''}
+    <div class="reacoes-bar" id="rb-${p.id}">${renderReacoesBar(p)}</div>
     <div class="post-actions">
-      <button class="btn-action${liked?' liked':''}" onclick="curtir('${p.id}')">
-        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="${liked?'currentColor':'none'}"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-        ${nLikes>0?nLikes:''}
-      </button>
+      <div class="reacoes-wrap">
+        <div class="reacoes-picker" id="rp-${p.id}">
+          <button class="reacao-opt" onclick="reagir('${p.id}','❤️')">❤️</button><button class="reacao-opt" onclick="reagir('${p.id}','😂')">😂</button><button class="reacao-opt" onclick="reagir('${p.id}','😮')">😮</button><button class="reacao-opt" onclick="reagir('${p.id}','😢')">😢</button><button class="reacao-opt" onclick="reagir('${p.id}','👏')">👏</button><button class="reacao-opt" onclick="reagir('${p.id}','🦫')">🦫</button><button class="reacao-opt" onclick="reagir('${p.id}','🐒')">🐒</button><button class="reacao-opt" onclick="reagir('${p.id}','🦥')">🦥</button><button class="reacao-opt" onclick="reagir('${p.id}','🐷')">🐷</button>
+        </div>
+        <button class="btn-action" onclick="togglePicker('${p.id}')" onblur="setTimeout(()=>closePicker('${p.id}'),200)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          Reagir
+        </button>
+      </div>
       <button class="btn-action" onclick="focarComentario('${p.id}')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
         ${comments.length>0?comments.length:''}
@@ -457,11 +671,7 @@ function renderPost(p){
   </div>`;
 }
 
-window.curtir = async id => {
-  const r = ref(db,`posts/${id}/curtidas/${user.uid}`);
-  const snap = await get(r);
-  if(snap.exists()) await set(r,null); else await set(r,true);
-};
+
 
 window.focarComentario = id => { const el=$(`ci-${id}`); if(el){el.focus();el.scrollIntoView({behavior:'smooth',block:'center'});} };
 
@@ -565,6 +775,7 @@ onAuthStateChanged(auth, async u => {
     $('authScreen').style.display='none';
     $('app').style.display='block';
     renderFeed();
+    renderStoriesBar();
   } else {
     user=null; userProfile=null;
     $('authScreen').style.display='flex';
