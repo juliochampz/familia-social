@@ -134,19 +134,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--brown)
 .crop-title{color:#fff;font-size:16px;font-weight:700;text-align:center}
 .crop-hint{color:rgba(255,255,255,.55);font-size:12px;text-align:center;margin-top:-8px}
 .crop-frame{width:100%;max-width:360px;aspect-ratio:4/3;border-radius:16px;overflow:hidden;
-  position:relative;background:#111;touch-action:none;border:2px solid rgba(255,255,255,.2)}
-.crop-img{position:absolute;transform-origin:0 0;cursor:grab;user-select:none;-webkit-user-select:none;display:block}
-.crop-img:active{cursor:grabbing}
+  position:relative;background:#222;touch-action:none;border:2px solid rgba(255,255,255,.2);cursor:grab}
+.crop-frame:active{cursor:grabbing}
+.crop-canvas{position:absolute;inset:0;width:100%;height:100%}
 .crop-btns{display:flex;gap:10px;width:100%;max-width:360px}
 .crop-btn{flex:1;padding:13px;border:none;border-radius:12px;font-size:14px;font-weight:700;
   cursor:pointer;font-family:inherit;transition:.15s}
 .crop-btn.cancel{background:rgba(255,255,255,.12);color:#fff}
-.crop-btn.cancel:hover{background:rgba(255,255,255,.2)}
 .crop-btn.confirm{background:var(--accent);color:#fff}
-.crop-btn.confirm:hover{background:#b5682d}
 .crop-zoom-row{display:flex;align-items:center;gap:10px;width:100%;max-width:360px}
 .crop-zoom-row label{color:rgba(255,255,255,.65);font-size:12px;white-space:nowrap}
-.crop-zoom-row input[type=range]{flex:1;accent-color:var(--accent);height:4px}
+.crop-zoom-row input[type=range]{flex:1;accent-color:var(--accent);height:4px;cursor:pointer}
 textarea{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;
   font-size:14px;color:var(--brown);background:var(--cream);resize:none;
   font-family:'DM Sans',sans-serif;min-height:90px}
@@ -366,11 +364,11 @@ textarea:focus{outline:none;border-color:var(--accent)}
   <div class="crop-title">✂️ Ajustar foto</div>
   <div class="crop-hint">Arraste para reposicionar · Zoom para ajustar</div>
   <div class="crop-frame" id="cropFrame">
-    <img id="cropImg" class="crop-img" draggable="false" src="">
+    <canvas id="cropCanvas" class="crop-canvas"></canvas>
   </div>
   <div class="crop-zoom-row">
     <label>🔍 Zoom</label>
-    <input type="range" id="cropZoom" min="1" max="3" step="0.01" value="1" oninput="onCropZoom()">
+    <input type="range" id="cropZoom" min="0" max="100" step="1" value="0" oninput="onCropZoom()">
   </div>
   <div class="crop-btns">
     <button class="crop-btn cancel" onclick="cancelarCrop()">Cancelar</button>
@@ -635,81 +633,86 @@ window.abrirModal=()=>{$('modalOverlay').classList.add('open');$('postTexto').fo
 window.fecharModal=()=>{$('modalOverlay').classList.remove('open');fotoFile=null;$('uploadPreview').style.display='none';$('uploadArea').style.display='';$('postTexto').value='';$('fotoInput').value='';};
 window.removerFoto=()=>{fotoFile=null;$('uploadPreview').style.display='none';$('uploadArea').style.display='';$('fotoInput').value='';};
 
-// ── CROP ──────────────────────────────────────────
-let cs={scale:1,x:0,y:0,nw:0,nh:0,minScale:1};
+// ── CROP (canvas-based, bulletproof) ──────────────
+let cropImg=new Image(), cs={x:0,y:0,scale:1,minScale:1,maxScale:3,fw:0,fh:0};
+
+function drawCrop(){
+  const canvas=$('cropCanvas');
+  const dpr=window.devicePixelRatio||1;
+  if(canvas.width!==cs.fw*dpr){canvas.width=cs.fw*dpr;canvas.height=cs.fh*dpr;}
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.save();ctx.scale(dpr,dpr);
+  ctx.drawImage(cropImg,cs.x,cs.y,cropImg.naturalWidth*cs.scale,cropImg.naturalHeight*cs.scale);
+  ctx.restore();
+}
+
+function clampCrop(){
+  const iw=cropImg.naturalWidth*cs.scale,ih=cropImg.naturalHeight*cs.scale;
+  cs.x=Math.min(0,Math.max(cs.fw-iw,cs.x));
+  cs.y=Math.min(0,Math.max(cs.fh-ih,cs.y));
+}
+
+function centerCrop(){
+  const iw=cropImg.naturalWidth*cs.scale,ih=cropImg.naturalHeight*cs.scale;
+  cs.x=(cs.fw-iw)/2;cs.y=(cs.fh-ih)/2;
+}
 
 window.previewFoto=e=>{
   const file=e.target.files[0];if(!file)return;
-  const url=URL.createObjectURL(file);
-  const img=$('cropImg');
-  img.onload=()=>{
-    cs.nw=img.naturalWidth;cs.nh=img.naturalHeight;
-    cs.scale=1;cs.x=0;cs.y=0;
-    $('cropZoom').value=1;
-    // calc min scale to cover frame (4:3)
-    setTimeout(()=>{
-      const fw=$('cropFrame').offsetWidth,fh=$('cropFrame').offsetHeight;
-      const minS=Math.max(fw/cs.nw,fh/cs.nh);
-      cs.minScale=minS;
-      cs.scale=minS;
-      $('cropZoom').min=minS;
-      $('cropZoom').max=minS*3;
-      $('cropZoom').value=minS;
-      // center
-      const iw=cs.nw*cs.scale,ih=cs.nh*cs.scale;
-      cs.x=(fw-iw)/2;cs.y=(fh-ih)/2;
-      applyT();
-      $('cropModal').classList.add('open');
-    },50);
+  cropImg=new Image();
+  cropImg.onload=()=>{
+    // wait for DOM to render frame
+    $('cropModal').classList.add('open');
+    requestAnimationFrame(()=>{
+      const frame=$('cropFrame');
+      cs.fw=frame.offsetWidth;cs.fh=frame.offsetHeight;
+      // min scale = cover frame
+      cs.minScale=Math.max(cs.fw/cropImg.naturalWidth,cs.fh/cropImg.naturalHeight);
+      cs.maxScale=cs.minScale*3;
+      cs.scale=cs.minScale;
+      $('cropZoom').value=0; // 0% = minScale
+      centerCrop();
+      drawCrop();
+    });
   };
-  img.src=url;
+  cropImg.src=URL.createObjectURL(file);
 };
-
-function applyT(){
-  $('cropImg').style.width=cs.nw+'px';
-  $('cropImg').style.height=cs.nh+'px';
-  $('cropImg').style.transform=`translate(${cs.x}px,${cs.y}px) scale(${cs.scale})`;
-}
-function clamp(){
-  const fw=$('cropFrame').offsetWidth,fh=$('cropFrame').offsetHeight;
-  const iw=cs.nw*cs.scale,ih=cs.nh*cs.scale;
-  cs.x=Math.min(0,Math.max(fw-iw,cs.x));
-  cs.y=Math.min(0,Math.max(fh-ih,cs.y));
-}
 
 window.onCropZoom=()=>{
-  const ns=parseFloat($('cropZoom').value);
-  const fw=$('cropFrame').offsetWidth,fh=$('cropFrame').offsetHeight;
-  const cx=fw/2-cs.x,cy=fh/2-cs.y;
+  const pct=parseInt($('cropZoom').value)/100; // 0..1
+  const ns=cs.minScale+pct*(cs.maxScale-cs.minScale);
+  // zoom toward center
+  const cx=cs.fw/2-cs.x,cy=cs.fh/2-cs.y;
   const r=ns/cs.scale;
-  cs.x=fw/2-cx*r;cs.y=fh/2-cy*r;
-  cs.scale=ns;clamp();applyT();
+  cs.x=cs.fw/2-cx*r;cs.y=cs.fh/2-cy*r;
+  cs.scale=ns;clampCrop();drawCrop();
 };
 
-// drag (mouse + touch)
+// drag
 (function(){
   let drag=false,lx=0,ly=0;
-  const inFrame=e=>{const f=$('cropFrame');return f&&f.contains(e.target);};
-  document.addEventListener('mousedown',e=>{if(inFrame(e)){drag=true;lx=e.clientX;ly=e.clientY;e.preventDefault();}});
-  document.addEventListener('mousemove',e=>{if(!drag)return;cs.x+=e.clientX-lx;cs.y+=e.clientY-ly;lx=e.clientX;ly=e.clientY;clamp();applyT();});
-  document.addEventListener('mouseup',()=>{drag=false;});
-  document.addEventListener('touchstart',e=>{if(inFrame(e)&&e.touches.length===1){drag=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;}},{passive:true});
-  document.addEventListener('touchmove',e=>{if(!drag)return;e.preventDefault();cs.x+=e.touches[0].clientX-lx;cs.y+=e.touches[0].clientY-ly;lx=e.touches[0].clientX;ly=e.touches[0].clientY;clamp();applyT();},{passive:false});
-  document.addEventListener('touchend',()=>{drag=false;},{passive:true});
+  const frame=()=>$('cropFrame');
+  const inF=e=>frame()&&frame().contains(e.target);
+  document.addEventListener('mousedown',e=>{if(inF(e)){drag=true;lx=e.clientX;ly=e.clientY;e.preventDefault();}});
+  document.addEventListener('mousemove',e=>{if(!drag)return;cs.x+=e.clientX-lx;cs.y+=e.clientY-ly;lx=e.clientX;ly=e.clientY;clampCrop();drawCrop();});
+  document.addEventListener('mouseup',()=>drag=false);
+  document.addEventListener('touchstart',e=>{if(inF(e)&&e.touches.length===1){drag=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;}},{passive:true});
+  document.addEventListener('touchmove',e=>{if(!drag)return;e.preventDefault();cs.x+=e.touches[0].clientX-lx;cs.y+=e.touches[0].clientY-ly;lx=e.touches[0].clientX;ly=e.touches[0].clientY;clampCrop();drawCrop();},{passive:false});
+  document.addEventListener('touchend',()=>drag=false,{passive:true});
 })();
 
 window.cancelarCrop=()=>{$('cropModal').classList.remove('open');$('fotoInput').value='';fotoFile=null;};
 
 window.confirmarCrop=()=>{
-  const frame=$('cropFrame');
-  const fw=frame.offsetWidth,fh=frame.offsetHeight;
   const dpr=window.devicePixelRatio||1;
-  const canvas=document.createElement('canvas');
-  canvas.width=fw*dpr;canvas.height=fh*dpr;
-  const ctx=canvas.getContext('2d');
-  ctx.scale(dpr,dpr);
-  ctx.drawImage($('cropImg'),cs.x,cs.y,cs.nw*cs.scale,cs.nh*cs.scale);
-  canvas.toBlob(blob=>{
+  const out=document.createElement('canvas');
+  out.width=cs.fw*dpr;out.height=cs.fh*dpr;
+  const ctx=out.getContext('2d');
+  ctx.save();ctx.scale(dpr,dpr);
+  ctx.drawImage(cropImg,cs.x,cs.y,cropImg.naturalWidth*cs.scale,cropImg.naturalHeight*cs.scale);
+  ctx.restore();
+  out.toBlob(blob=>{
     fotoFile=new File([blob],'foto.jpg',{type:'image/jpeg'});
     $('previewImg').src=URL.createObjectURL(blob);
     $('uploadPreview').style.display='';
