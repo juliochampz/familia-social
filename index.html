@@ -175,7 +175,20 @@ textarea:focus{outline:none;border-color:var(--accent)}
 .empty-icon{font-size:48px;margin-bottom:12px}
 .empty p{font-size:14px;line-height:1.5}
 
-/* ─── STORIES ─── */
+/* ✅ Lightbox — visualização de foto em tela cheia */
+.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:600;
+  align-items:center;justify-content:center;flex-direction:column}
+.lightbox.open{display:flex}
+.lightbox-img{max-width:100%;max-height:90vh;object-fit:contain;border-radius:8px;
+  animation:lbIn .2s ease}
+@keyframes lbIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.lightbox-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);
+  border:none;color:#fff;font-size:22px;width:40px;height:40px;border-radius:50%;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);transition:background .2s}
+.lightbox-close:hover{background:rgba(255,255,255,.3)}
+.lightbox-caption{color:rgba(255,255,255,.7);font-size:13px;margin-top:12px;text-align:center;padding:0 20px}
+
 .stories-bar{display:flex;gap:12px;padding:14px 16px;overflow-x:auto;scrollbar-width:none;
   background:var(--white);border-bottom:1px solid var(--border)}
 .stories-bar::-webkit-scrollbar{display:none}
@@ -238,6 +251,23 @@ textarea:focus{outline:none;border-color:var(--accent)}
   border-radius:12px;padding:2px 8px;font-size:12px;cursor:pointer;border:1px solid var(--border)}
 .reacao-count.minha{border-color:var(--accent);background:#fff5ed}
 
+/* Toast de notificação (substitui alert()) */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);
+  padding:10px 18px;border-radius:20px;font-size:13px;font-weight:500;color:#fff;
+  opacity:0;transition:all .3s;z-index:999;pointer-events:none;max-width:280px;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.success{background:#4A7C59}
+.toast.error{background:#C0392B}
+.toast.info{background:#3D2B1F}
+
+/* Botão carregar mais posts */
+.btn-load-more{display:block;width:calc(100% - 32px);margin:0 16px 16px;padding:12px;
+  background:var(--white);border:1.5px solid var(--border);border-radius:14px;
+  color:var(--brown2);font-size:13px;font-weight:600;cursor:pointer;text-align:center;
+  font-family:'DM Sans',sans-serif;transition:all .2s}
+.btn-load-more:hover{border-color:var(--accent);color:var(--accent)}
+.btn-load-more:disabled{opacity:.5;cursor:not-allowed}
+
 /* PTR */
 .ptr-indicator{position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(-60px);
   background:var(--brown);color:#fff;padding:8px 16px;border-radius:0 0 16px 16px;
@@ -286,6 +316,13 @@ textarea:focus{outline:none;border-color:var(--accent)}
     <div class="loading" style="padding:10px"><div class="spinner" style="width:20px;height:20px;margin:0"></div></div>
   </div>
 
+  <!-- ✅ Lightbox -->
+  <div class="lightbox" id="lightbox" onclick="if(event.target===this)fecharLightbox()">
+    <button class="lightbox-close" onclick="fecharLightbox()">✕</button>
+    <img class="lightbox-img" id="lightboxImg" src="" alt="">
+    <div class="lightbox-caption" id="lightboxCaption"></div>
+  </div>
+
   <!-- Story Viewer -->
   <div class="story-viewer" id="storyViewer">
     <div class="story-progress" id="storyProgress"></div>
@@ -307,6 +344,7 @@ textarea:focus{outline:none;border-color:var(--accent)}
     </div>
   </div>
 
+  <div class="toast" id="toast"></div>
   <div class="ptr-indicator" id="ptrIndicator"><div class="ptr-spinner"></div><span id="ptrText">Atualizando...</span></div>
   <div id="pageFeed" class="feed"><div class="loading"><div class="spinner"></div>Carregando...</div></div>
 
@@ -390,12 +428,26 @@ const CODIGO_CONVITE='FAMILIA2025';
 const CLOUD_NAME='du6dxasku';
 const UPLOAD_PRESET='familia_social';
 
+// ✅ MELHORIA: Toast amigável no lugar de alert()
+function showToast(msg,type='info',duration=3000){
+  const t=$('toast');
+  t.textContent=msg;t.className=`toast ${type}`;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'),duration);
+}
+
 async function uploadImagem(file){
+  // ✅ MELHORIA: validação de tipo e tamanho antes de enviar
+  const tiposPermitidos=['image/jpeg','image/png','image/webp','image/gif'];
+  if(!tiposPermitidos.includes(file.type))throw new Error('Formato não suportado. Use JPG, PNG ou WebP.');
+  if(file.size>10*1024*1024)throw new Error('Imagem muito grande. Máximo 10MB.');
   const fd=new FormData();
   fd.append('file',file);fd.append('upload_preset',UPLOAD_PRESET);fd.append('folder','familia_social');
   const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,{method:'POST',body:fd});
+  if(!res.ok)throw new Error('Falha na conexão com o servidor de imagens.');
   const data=await res.json();
-  if(!data.secure_url)throw new Error('Erro no upload');
+  if(!data.secure_url)throw new Error('Erro no upload da imagem.');
   return data.secure_url;
 }
 
@@ -495,6 +547,11 @@ window.reagir=async(id,emoji)=>{
   const snap=await get(r);
   if(snap.exists()&&snap.val().emoji===emoji)await set(r,null);
   else await set(r,{emoji,uid:user.uid,nome:userProfile?.nome||user.displayName||'Familiar'});
+  // ✅ FIX: atualiza só a barra de reações sem re-renderizar o feed inteiro (evita o scroll pular)
+  const postSnap=await get(ref(db,'posts/'+id));
+  const postData={id,...(postSnap.val()||{})};
+  const barEl=document.getElementById('rb-'+id);
+  if(barEl)barEl.innerHTML=renderReacoesBar(postData);
 };
 
 // ─── STORIES ───
@@ -538,7 +595,7 @@ window.publicarStory=async e=>{
   try{
     const url=await uploadImagem(file);
     await push(ref(db,'stories'),{uid:user.uid,nome:userProfile?.nome||'Familiar',foto:userProfile?.foto||null,img:url,ts:Date.now()});
-  }catch(err){alert('Erro ao publicar story');}
+  }catch(err){showToast(err.message||'Erro ao publicar story','error');}
   e.target.value='';
 };
 
@@ -660,21 +717,52 @@ window.fecharStory=()=>{
   next.addEventListener('pointerleave',onHoldEnd);
 })();
 
-// FEED
-let feedListenerAtivo=false;
+// FEED com paginação
+const POSTS_POR_PAGINA=10;
+let todosOsPosts=[],postsExibidos=0,feedListenerAtivo=false;
+
 function renderFeed(){
   const feedEl=$('pageFeed');
   if(feedListenerAtivo)return;
   feedListenerAtivo=true;
   feedEl.innerHTML='<div class="loading"><div class="spinner"></div></div>';
   onValue(ref(db,'posts'),snap=>{
-    const posts=[];
-    snap.forEach(c=>{const v=c.val();if(v)posts.push({id:c.key,...v});});
-    posts.sort((a,b)=>(b.ts||0)-(a.ts||0));
-    if(!posts.length){feedEl.innerHTML=`<div class="empty"><div class="empty-icon">🦫</div><p>Nenhuma publicação ainda.<br>Seja o primeiro a compartilhar!</p></div>`;return;}
-    feedEl.innerHTML=posts.map(p=>renderPost(p)).join('');
+    todosOsPosts=[];
+    snap.forEach(c=>{const v=c.val();if(v)todosOsPosts.push({id:c.key,...v});});
+    todosOsPosts.sort((a,b)=>(b.ts||0)-(a.ts||0));
+    postsExibidos=0;
+    if(!todosOsPosts.length){
+      feedEl.innerHTML=`<div class="empty"><div class="empty-icon">🦫</div><p>Nenhuma publicação ainda.<br>Seja o primeiro a compartilhar!</p></div>`;
+      return;
+    }
+    feedEl.innerHTML='';
+    carregarMaisPosts();
   });
 }
+
+function carregarMaisPosts(){
+  const feedEl=$('pageFeed');
+  // Remove botão anterior se existir
+  const btnAnt=document.getElementById('btnLoadMore');
+  if(btnAnt)btnAnt.remove();
+  const lote=todosOsPosts.slice(postsExibidos,postsExibidos+POSTS_POR_PAGINA);
+  lote.forEach(p=>{
+    const div=document.createElement('div');
+    div.innerHTML=renderPost(p);
+    feedEl.appendChild(div.firstElementChild);
+  });
+  postsExibidos+=lote.length;
+  // Adiciona botão "Ver mais" se ainda há posts
+  if(postsExibidos<todosOsPosts.length){
+    const btn=document.createElement('button');
+    btn.id='btnLoadMore';
+    btn.className='btn-load-more';
+    btn.textContent=`Ver mais (${todosOsPosts.length-postsExibidos} restantes)`;
+    btn.onclick=()=>{btn.disabled=true;btn.textContent='Carregando...';carregarMaisPosts();};
+    feedEl.appendChild(btn);
+  }
+}
+window.carregarMaisPosts=carregarMaisPosts;
 
 function renderPost(p){
   const commentsHtml=Object.entries(p.comentarios||{}).map(([cid,c])=>`
@@ -686,7 +774,7 @@ function renderPost(p){
       </div>
       ${c.uid===user?.uid?`<button class="btn-del-comment" title="Apagar comentário" onclick="excluirComentario('${p.id}','${cid}')">🗑️</button>`:''}
     </div>`).join('');
-  const imgHtml=p.foto?`<img class="post-img" src="${p.foto}" loading="lazy" alt="foto">`:'';
+  const imgHtml=p.foto?`<img class="post-img" src="${p.foto}" loading="lazy" alt="foto" onclick="abrirLightbox('${p.foto}','${(p.autorNome||'').replace(/'/g,"\\'")} • ${fmtTempo(p.ts)}')" style="cursor:zoom-in">`:'';
 
   // ✅ MELHORIA 1: header do post clicável se não for o próprio usuário
   const isOwn=p.autorUid===user?.uid;
@@ -749,14 +837,21 @@ function renderPost(p){
 window.focarComentario=id=>{const el=$(`ci-${id}`);if(el){el.focus();el.scrollIntoView({behavior:'smooth',block:'center'});}};
 window.enviarComentario=async id=>{
   const el=$(`ci-${id}`);if(!el||!el.value.trim())return;
-  await push(ref(db,`posts/${id}/comentarios`),{texto:el.value.trim(),uid:user.uid,nome:userProfile?.nome||user.displayName||'Familiar',foto:userProfile?.foto||null,ts:Date.now()});
-  el.value='';
+  try{
+    await push(ref(db,`posts/${id}/comentarios`),{texto:el.value.trim(),uid:user.uid,nome:userProfile?.nome||user.displayName||'Familiar',foto:userProfile?.foto||null,ts:Date.now()});
+    el.value='';
+  }catch(e){showToast('Erro ao enviar comentário','error');}
 };
 window.excluirComentario=async(postId,comentId)=>{
   if(!confirm('Apagar este comentário?'))return;
-  await remove(ref(db,`posts/${postId}/comentarios/${comentId}`));
+  try{await remove(ref(db,`posts/${postId}/comentarios/${comentId}`));showToast('Comentário apagado','info');}
+  catch(e){showToast('Erro ao apagar comentário','error');}
 };
-window.excluirPost=async id=>{if(!confirm('Apagar esta publicação?'))return;await remove(ref(db,'posts/'+id));};
+window.excluirPost=async id=>{
+  if(!confirm('Apagar esta publicação?'))return;
+  try{await remove(ref(db,'posts/'+id));showToast('Publicação apagada','info');}
+  catch(e){showToast('Erro ao apagar publicação','error');}
+};
 
 // MODAL NOVO POST
 window.abrirModal=()=>{$('modalOverlay').classList.add('open');$('postTexto').focus();};
@@ -769,7 +864,7 @@ window.previewFoto=e=>{
 };
 window.publicar=async()=>{
   const texto=$('postTexto').value.trim();
-  if(!texto&&!fotoFile){alert('Adicione uma foto ou texto.');return;}
+  if(!texto&&!fotoFile){showToast('Adicione uma foto ou texto.','info');return;}
   const btn=$('btnPost');btn.disabled=true;btn.textContent='Publicando...';
   try{
     let fotoUrl=null;
@@ -777,8 +872,8 @@ window.publicar=async()=>{
     const snap=await get(ref(db,`usuarios/${user.uid}`));
     const perfil=snap.val()||{};
     await push(ref(db,'posts'),{texto,foto:fotoUrl,autorUid:user.uid,autorNome:perfil.nome||user.displayName||'Familiar',autorFoto:perfil.foto||null,ts:Date.now()});
-    fecharModal();
-  }catch(e){alert('Erro ao publicar. Tente novamente.');}
+    fecharModal();showToast('Publicado com sucesso! 🦫','success');
+  }catch(e){showToast(e.message||'Erro ao publicar. Tente novamente.','error');}
   btn.disabled=false;btn.textContent='Publicar 🦫';
 };
 
@@ -801,8 +896,8 @@ async function renderPerfil(){
 }
 window.uploadAvatar=async e=>{
   const file=e.target.files[0];if(!file)return;
-  try{const url=await uploadImagem(file);await update(ref(db,`usuarios/${user.uid}`),{foto:url});userProfile={...userProfile,foto:url};$('profileAvatar').innerHTML=`<img src="${url}">`;$('topAvatar').innerHTML=`<img src="${url}">`;}
-  catch(e){alert('Erro ao enviar foto.');}
+  try{const url=await uploadImagem(file);await update(ref(db,`usuarios/${user.uid}`),{foto:url});userProfile={...userProfile,foto:url};$('profileAvatar').innerHTML=`<img src="${url}">`;$('topAvatar').innerHTML=`<img src="${url}">`;showToast('Foto atualizada!','success');}
+  catch(e){showToast(e.message||'Erro ao enviar foto.','error');}
 };
 
 // MEMBROS
@@ -823,6 +918,21 @@ window.abrirFotoPost=id=>{
   showPage('feed');
   setTimeout(()=>{const el=document.getElementById('post-'+id);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},300);
 };
+
+// ✅ Lightbox
+window.abrirLightbox=(src,caption)=>{
+  $('lightboxImg').src=src;
+  $('lightboxCaption').textContent=caption||'';
+  $('lightbox').classList.add('open');
+  document.body.style.overflow='hidden';
+};
+window.fecharLightbox=()=>{
+  $('lightbox').classList.remove('open');
+  $('lightboxImg').src='';
+  document.body.style.overflow='';
+};
+// Fechar lightbox com tecla ESC
+document.addEventListener('keydown',e=>{if(e.key==='Escape')fecharLightbox();});
 
 // PTR
 (function(){
