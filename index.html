@@ -2,6 +2,13 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Nossa Família">
+<meta name="theme-color" content="#3D2B1F">
+<link rel="apple-touch-icon" href="icon-192.svg">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Nossa Família</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -781,6 +788,40 @@ onAuthStateChanged(auth, async u => {
     $('authScreen').style.display='flex';
     $('app').style.display='none';
   }
+});
+</script>
+
+  <div id="btnInstalar" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+    background:#3D2B1F;color:#fff;padding:10px 20px;border-radius:24px;font-size:13px;font-weight:600;
+    align-items:center;gap:8px;box-shadow:0 4px 16px rgba(61,43,31,.4);cursor:pointer;z-index:300;
+    white-space:nowrap;border:none;font-family:inherit" onclick="instalarApp()">
+    📲 Instalar o app
+  </div>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').catch(e=>console.log('SW erro:',e));
+  });
+}
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault();
+  deferredPrompt = e;
+  setTimeout(()=>{
+    if(deferredPrompt && document.getElementById('btnInstalar'))
+      document.getElementById('btnInstalar').style.display='flex';
+  }, 3000);
+});
+window.instalarApp=async()=>{
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt=null;
+  document.getElementById('btnInstalar').style.display='none';
+};
+window.addEventListener('appinstalled',()=>{
+  const b=document.getElementById('btnInstalar'); if(b) b.style.display='none';
 });
 </script>
 </body>
