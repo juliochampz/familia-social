@@ -72,7 +72,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--brown)
 .post-meta{flex:1}
 .post-name{font-size:14px;font-weight:600;color:var(--brown)}
 .post-time{font-size:11px;color:var(--gray);margin-top:1px}
-.post-img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:#f0e8e0}
+.post-img{width:100%;height:auto;display:block;object-fit:contain;background:#f0e8e0;}
 .post-body{padding:12px 14px}
 .post-text{font-size:14px;color:var(--brown2);line-height:1.55;margin-bottom:10px}
 .post-text:empty{display:none}
@@ -121,30 +121,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--brown)
 .upload-area:hover{border-color:var(--accent)}
 .upload-area .icon{font-size:36px;margin-bottom:8px}
 .upload-area p{font-size:13px;color:var(--gray)}
-.upload-preview{width:100%;border-radius:16px;overflow:hidden;margin-bottom:14px;
-  aspect-ratio:4/3;position:relative}
-.upload-preview img{width:100%;height:100%;object-fit:cover}
+.upload-preview{width:100%;border-radius:16px;overflow:hidden;margin-bottom:14px;position:relative}
+.upload-preview img{width:100%;height:auto;display:block;max-height:400px;object-fit:contain;background:#f0e8e0}
 .upload-preview .remove-img{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.5);
   color:#fff;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;
   display:flex;align-items:center;justify-content:center;font-size:14px}
-/* ── CROP ── */
-.crop-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:300;
-  flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:14px}
-.crop-modal.open{display:flex}
-.crop-title{color:#fff;font-size:16px;font-weight:700;text-align:center}
-.crop-hint{color:rgba(255,255,255,.55);font-size:12px;text-align:center;margin-top:-8px}
-.crop-frame{width:100%;max-width:360px;aspect-ratio:4/3;border-radius:16px;overflow:hidden;
-  position:relative;background:#222;touch-action:none;border:2px solid rgba(255,255,255,.2);cursor:grab}
-.crop-frame:active{cursor:grabbing}
-.crop-canvas{position:absolute;inset:0;width:100%;height:100%}
-.crop-btns{display:flex;gap:10px;width:100%;max-width:360px}
-.crop-btn{flex:1;padding:13px;border:none;border-radius:12px;font-size:14px;font-weight:700;
-  cursor:pointer;font-family:inherit;transition:.15s}
-.crop-btn.cancel{background:rgba(255,255,255,.12);color:#fff}
-.crop-btn.confirm{background:var(--accent);color:#fff}
-.crop-zoom-row{display:flex;align-items:center;gap:10px;width:100%;max-width:360px}
-.crop-zoom-row label{color:rgba(255,255,255,.65);font-size:12px;white-space:nowrap}
-.crop-zoom-row input[type=range]{flex:1;accent-color:var(--accent);height:4px;cursor:pointer}
+
 textarea{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;
   font-size:14px;color:var(--brown);background:var(--cream);resize:none;
   font-family:'DM Sans',sans-serif;min-height:90px}
@@ -359,22 +341,7 @@ textarea:focus{outline:none;border-color:var(--accent)}
   </div>
 </div>
 
-<!-- CROP MODAL -->
-<div class="crop-modal" id="cropModal">
-  <div class="crop-title">✂️ Ajustar foto</div>
-  <div class="crop-hint">Arraste para reposicionar · Zoom para ajustar</div>
-  <div class="crop-frame" id="cropFrame">
-    <canvas id="cropCanvas" class="crop-canvas"></canvas>
-  </div>
-  <div class="crop-zoom-row">
-    <label>🔍 Zoom</label>
-    <input type="range" id="cropZoom" min="0" max="100" step="1" value="0" oninput="onCropZoom()">
-  </div>
-  <div class="crop-btns">
-    <button class="crop-btn cancel" onclick="cancelarCrop()">Cancelar</button>
-    <button class="crop-btn confirm" onclick="confirmarCrop()">Usar esta foto ✓</button>
-  </div>
-</div>
+
 
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -633,92 +600,13 @@ window.abrirModal=()=>{$('modalOverlay').classList.add('open');$('postTexto').fo
 window.fecharModal=()=>{$('modalOverlay').classList.remove('open');fotoFile=null;$('uploadPreview').style.display='none';$('uploadArea').style.display='';$('postTexto').value='';$('fotoInput').value='';};
 window.removerFoto=()=>{fotoFile=null;$('uploadPreview').style.display='none';$('uploadArea').style.display='';$('fotoInput').value='';};
 
-// ── CROP (canvas-based, bulletproof) ──────────────
-let cropImg=new Image(), cs={x:0,y:0,scale:1,minScale:1,maxScale:3,fw:0,fh:0};
-
-function drawCrop(){
-  const canvas=$('cropCanvas');
-  const dpr=window.devicePixelRatio||1;
-  if(canvas.width!==cs.fw*dpr){canvas.width=cs.fw*dpr;canvas.height=cs.fh*dpr;}
-  const ctx=canvas.getContext('2d');
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.save();ctx.scale(dpr,dpr);
-  ctx.drawImage(cropImg,cs.x,cs.y,cropImg.naturalWidth*cs.scale,cropImg.naturalHeight*cs.scale);
-  ctx.restore();
-}
-
-function clampCrop(){
-  const iw=cropImg.naturalWidth*cs.scale,ih=cropImg.naturalHeight*cs.scale;
-  cs.x=Math.min(0,Math.max(cs.fw-iw,cs.x));
-  cs.y=Math.min(0,Math.max(cs.fh-ih,cs.y));
-}
-
-function centerCrop(){
-  const iw=cropImg.naturalWidth*cs.scale,ih=cropImg.naturalHeight*cs.scale;
-  cs.x=(cs.fw-iw)/2;cs.y=(cs.fh-ih)/2;
-}
-
 window.previewFoto=e=>{
-  const file=e.target.files[0];if(!file)return;
-  cropImg=new Image();
-  cropImg.onload=()=>{
-    // wait for DOM to render frame
-    $('cropModal').classList.add('open');
-    requestAnimationFrame(()=>{
-      const frame=$('cropFrame');
-      cs.fw=frame.offsetWidth;cs.fh=frame.offsetHeight;
-      // min scale = cover frame
-      cs.minScale=Math.max(cs.fw/cropImg.naturalWidth,cs.fh/cropImg.naturalHeight);
-      cs.maxScale=cs.minScale*3;
-      cs.scale=cs.minScale;
-      $('cropZoom').value=0; // 0% = minScale
-      centerCrop();
-      drawCrop();
-    });
-  };
-  cropImg.src=URL.createObjectURL(file);
-};
-
-window.onCropZoom=()=>{
-  const pct=parseInt($('cropZoom').value)/100; // 0..1
-  const ns=cs.minScale+pct*(cs.maxScale-cs.minScale);
-  // zoom toward center
-  const cx=cs.fw/2-cs.x,cy=cs.fh/2-cs.y;
-  const r=ns/cs.scale;
-  cs.x=cs.fw/2-cx*r;cs.y=cs.fh/2-cy*r;
-  cs.scale=ns;clampCrop();drawCrop();
-};
-
-// drag
-(function(){
-  let drag=false,lx=0,ly=0;
-  const frame=()=>$('cropFrame');
-  const inF=e=>frame()&&frame().contains(e.target);
-  document.addEventListener('mousedown',e=>{if(inF(e)){drag=true;lx=e.clientX;ly=e.clientY;e.preventDefault();}});
-  document.addEventListener('mousemove',e=>{if(!drag)return;cs.x+=e.clientX-lx;cs.y+=e.clientY-ly;lx=e.clientX;ly=e.clientY;clampCrop();drawCrop();});
-  document.addEventListener('mouseup',()=>drag=false);
-  document.addEventListener('touchstart',e=>{if(inF(e)&&e.touches.length===1){drag=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;}},{passive:true});
-  document.addEventListener('touchmove',e=>{if(!drag)return;e.preventDefault();cs.x+=e.touches[0].clientX-lx;cs.y+=e.touches[0].clientY-ly;lx=e.touches[0].clientX;ly=e.touches[0].clientY;clampCrop();drawCrop();},{passive:false});
-  document.addEventListener('touchend',()=>drag=false,{passive:true});
-})();
-
-window.cancelarCrop=()=>{$('cropModal').classList.remove('open');$('fotoInput').value='';fotoFile=null;};
-
-window.confirmarCrop=()=>{
-  const dpr=window.devicePixelRatio||1;
-  const out=document.createElement('canvas');
-  out.width=cs.fw*dpr;out.height=cs.fh*dpr;
-  const ctx=out.getContext('2d');
-  ctx.save();ctx.scale(dpr,dpr);
-  ctx.drawImage(cropImg,cs.x,cs.y,cropImg.naturalWidth*cs.scale,cropImg.naturalHeight*cs.scale);
-  ctx.restore();
-  out.toBlob(blob=>{
-    fotoFile=new File([blob],'foto.jpg',{type:'image/jpeg'});
-    $('previewImg').src=URL.createObjectURL(blob);
-    $('uploadPreview').style.display='';
-    $('uploadArea').style.display='none';
-    $('cropModal').classList.remove('open');
-  },'image/jpeg',0.92);
+  fotoFile=e.target.files[0];
+  if(!fotoFile)return;
+  const url=URL.createObjectURL(fotoFile);
+  $('previewImg').src=url;
+  $('uploadPreview').style.display='';
+  $('uploadArea').style.display='none';
 };
 
 window.publicar=async()=>{
