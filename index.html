@@ -330,6 +330,21 @@ textarea:focus{outline:none;border-color:var(--accent)}
       <button class="btn-outline" onclick="showPage('membros')">👨‍👩‍👧‍👦 Ver membros da família</button>
       <button class="btn-outline btn-danger" onclick="sair()">Sair</button>
     </div>
+    <div class="photos-grid" id="myPhotosGrid"></div>
+  </div>
+
+  <!-- PÁGINA PERFIL DE OUTRO USUÁRIO -->
+  <div id="pageUserPerfil" class="profile-page" style="display:none">
+    <button class="btn-outline" style="margin-bottom:12px" onclick="showPage('membros')">← Voltar</button>
+    <div class="profile-header">
+      <div class="profile-avatar" id="userPerfilAvatar"></div>
+      <div class="profile-name" id="userPerfilName">—</div>
+      <div class="profile-stats">
+        <div class="stat-card"><div class="stat-num" id="userPerfilPosts">0</div><div class="stat-lbl">publicações</div></div>
+        <div class="stat-card"><div class="stat-num" id="userPerfilLikes">0</div><div class="stat-lbl">curtidas recebidas</div></div>
+      </div>
+    </div>
+    <div class="photos-grid" id="userPhotosGrid"></div>
   </div>
 
   <!-- MEMBROS -->
@@ -352,6 +367,17 @@ textarea:focus{outline:none;border-color:var(--accent)}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
       Perfil
     </button>
+  </div>
+</div>
+
+<!-- MODAL QUEM REAGIU -->
+<div class="reac-modal" id="reacModal" onclick="if(event.target===this)fecharReacModal()">
+  <div class="reac-box">
+    <div class="reac-box-hdr">
+      <h4 id="reacModalTitulo">Reações</h4>
+      <button onclick="fecharReacModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--gray)">✕</button>
+    </div>
+    <div id="reacModalLista"></div>
   </div>
 </div>
 
@@ -483,7 +509,7 @@ function renderReacoesBar(p){
   Object.values(p.reacoes).forEach(r=>{ counts[r.emoji]=(counts[r.emoji]||0)+1; });
   const minhaReacao=p.reacoes[user?.uid]?.emoji;
   return Object.entries(counts).map(([emoji,n])=>
-    `<span class="reacao-count${emoji===minhaReacao?' minha':''}" onclick="reagir('${p.id}','${emoji}')">${emoji} ${n}</span>`
+    `<span class="reacao-count${emoji===minhaReacao?' minha':''}" onclick="verReacoes('${p.id}','${emoji}')" title="Ver quem reagiu">${emoji} ${n}</span>`
   ).join('');
 }
 
@@ -742,6 +768,15 @@ async function renderPerfil(){
   });
   $('statPosts').textContent=myPosts;
   $('statLikes').textContent=myLikes;
+
+  // Grid fotos próprias
+  const myPhotos=[];
+  postsSnap.forEach(c=>{const post=c.val();if(post.autorUid===user.uid&&post.foto)myPhotos.push({id:c.key,...post});});
+  myPhotos.sort((a,b)=>b.ts-a.ts);
+  const grid=$('myPhotosGrid');
+  grid.innerHTML=myPhotos.length
+    ?myPhotos.map(p=>`<div class="photo-thumb" onclick="abrirFotoPost('${p.id}')"><img src="${p.foto}" loading="lazy"></div>`).join('')
+    :'<div class="photos-empty">Nenhuma foto publicada ainda</div>';
 }
 
 window.uploadAvatar = async e => {
@@ -761,15 +796,71 @@ async function renderMembros(){
   const el=$('listaMembros'); el.innerHTML='';
   snap.forEach(c=>{
     const m=c.val();
-    el.innerHTML+=`<div class="member-card">
+    const uid=c.key;
+    el.innerHTML+=`<div class="member-card" style="cursor:pointer" onclick="verPerfilUsuario('${uid}')">
       ${avatarEl(m.nome,m.foto)}
       <div class="member-info">
         <div class="member-name">${m.nome}</div>
         <div class="member-email">${m.email}</div>
       </div>
+      <span style="color:var(--gray);font-size:18px">›</span>
     </div>`;
   });
 }
+
+// ── QUEM REAGIU ──────────────────────────────────
+window.verReacoes=async(postId,emoji)=>{
+  const snap=await get(ref(db,`posts/${postId}/reacoes`));
+  const reacoes=snap.val()||{};
+  const lista=Object.values(reacoes).filter(r=>r.emoji===emoji);
+  $('reacModalTitulo').textContent=`${emoji} ${lista.length} reação${lista.length!==1?'ões':''}`;
+  $('reacModalLista').innerHTML=lista.map(r=>`
+    <div class="reac-person">
+      <span class="reac-emoji">${r.emoji}</span>
+      <span class="reac-person-name">${r.nome||'Familiar'}</span>
+    </div>`).join('') || '<div style="color:var(--gray);font-size:14px">Ninguém ainda</div>';
+  $('reacModal').classList.add('open');
+};
+window.fecharReacModal=()=>$('reacModal').classList.remove('open');
+
+// ── PERFIL DE OUTRO USUÁRIO ───────────────────────
+window.verPerfilUsuario=async(uid)=>{
+  document.querySelectorAll('.page,.profile-page').forEach(p=>p.style.display='none');
+  const pgUp=$('pageUserPerfil'); pgUp.style.display='';
+
+  const uSnap=await get(ref(db,`usuarios/${uid}`));
+  const u=uSnap.val()||{};
+  $('userPerfilAvatar').innerHTML=u.foto?`<img src="${u.foto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(iniciais(u.nome||'?'));
+  $('userPerfilName').textContent=u.nome||'—';
+
+  const postsSnap=await get(ref(db,'posts'));
+  let posts=0,likes=0,fotos=[];
+  postsSnap.forEach(c=>{
+    const p=c.val();
+    if(p.autorUid===uid){
+      posts++;
+      if(p.reacoes) likes+=Object.keys(p.reacoes).length;
+      if(p.foto) fotos.push({id:c.key,...p});
+    }
+  });
+  fotos.sort((a,b)=>b.ts-a.ts);
+  $('userPerfilPosts').textContent=posts;
+  $('userPerfilLikes').textContent=likes;
+
+  const grid=$('userPhotosGrid');
+  grid.innerHTML=fotos.length
+    ?fotos.map(p=>`<div class="photo-thumb" onclick="abrirFotoPost('${p.id}')"><img src="${p.foto}" loading="lazy"></div>`).join('')
+    :'<div class="photos-empty">Nenhuma foto publicada ainda</div>';
+};
+
+// ── ABRIR FOTO NO FEED ────────────────────────────
+window.abrirFotoPost=id=>{
+  showPage({dataset:{page:'feed'}});
+  setTimeout(()=>{
+    const el=document.getElementById('post-'+id);
+    if(el) el.scrollIntoView({behavior:'smooth',block:'center'});
+  },300);
+};
 
 // ── INICIALIZAÇÃO ─────────────────────────────────
 onAuthStateChanged(auth, async u => {
