@@ -638,15 +638,15 @@ window.fecharStory=()=>{
 // ── FEED ──────────────────────────────────────────
 function renderFeed(){
   const feedEl = $('pageFeed');
-  const postsRef = query(ref(db,'posts'),orderByChild('ts'),limitToLast(50));
-  onValue(postsRef, snap => {
+  onValue(ref(db,'posts'), snap => {
     const posts = [];
-    snap.forEach(c => posts.unshift({id:c.key,...c.val()}));
+    snap.forEach(c => posts.push({id:c.key,...c.val()}));
+    // Ordenar por ts decrescente no cliente
+    posts.sort((a,b)=>(b.ts||0)-(a.ts||0));
     if(!posts.length){
       feedEl.innerHTML=`<div class="empty"><div class="empty-icon">🦫</div><p>Nenhuma publicação ainda.<br>Seja o primeiro a compartilhar!</p></div>`;
       return;
     }
-    // Manter scroll position
     const scrollY = window.scrollY;
     feedEl.innerHTML = posts.map(p => renderPost(p)).join('');
     window.scrollTo(0, scrollY);
