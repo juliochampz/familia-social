@@ -311,6 +311,8 @@ textarea:focus{outline:none;border-color:var(--accent)}
     <div class="story-tap-prev" onclick="prevStory()"></div>
     <div class="story-tap-next" onclick="nextStory()"></div>
   </div>
+  <!-- PTR INDICATOR -->
+  <div class="ptr-indicator" id="ptrIndicator"><div class="ptr-spinner"></div><span id="ptrText">Atualizando...</span></div>
   <!-- FEED -->
   <div id="pageFeed" class="feed">
     <div class="loading"><div class="spinner"></div>Carregando...</div>
@@ -522,8 +524,12 @@ window.reagir=async(id,emoji)=>{
   closePicker(id);
   const r=ref(db,`posts/${id}/reacoes/${user.uid}`);
   const snap=await get(r);
-  if(snap.exists()&&snap.val().emoji===emoji){ await set(r,null); }
-  else{ await set(r,{emoji,uid:user.uid,nome:userProfile?.nome||'Familiar'}); }
+  // Se já tem essa reação, remove; se tem outra ou não tem, coloca a nova
+  if(snap.exists()&&snap.val().emoji===emoji){
+    await set(r,null);
+  } else {
+    await set(r,{emoji,uid:user.uid,nome:userProfile?.nome||user.displayName||'Familiar'});
+  }
 };
 
 // ── STORIES ───────────────────────────────────────
@@ -672,6 +678,7 @@ function renderPost(p){
         <div class="post-name">${p.autorNome||'Familiar'}</div>
         <div class="post-time">${fmtTempo(p.ts)}</div>
       </div>
+      ${p.autorUid===user?.uid?`<button class="btn-delete-post" onclick="excluirPost('${p.id}')" title="Apagar publicação">🗑️</button>`:''}
     </div>
     ${imgHtml}
     ${p.texto?`<div class="post-body"><div class="post-text">${p.texto}</div></div>`:''}
@@ -739,11 +746,14 @@ window.publicar = async() => {
     if(fotoFile){
       fotoUrl = await uploadImagem(fotoFile);
     }
+    // Buscar perfil atualizado antes de publicar
+    const snap=await get(ref(db,`usuarios/${user.uid}`));
+    const perfil=snap.val()||{};
     await push(ref(db,'posts'),{
       texto, foto:fotoUrl,
       autorUid:user.uid,
-      autorNome:userProfile?.nome||user.displayName||'Familiar',
-      autorFoto:userProfile?.foto||null,
+      autorNome:perfil.nome||user.displayName||'Familiar',
+      autorFoto:perfil.foto||null,
       ts:Date.now()
     });
     fecharModal();
@@ -821,6 +831,11 @@ window.verReacoes=async(postId,emoji)=>{
     </div>`).join('') || '<div style="color:var(--gray);font-size:14px">Ninguém ainda</div>';
   $('reacModal').classList.add('open');
 };
+window.excluirPost=async(id)=>{
+  if(!confirm('Apagar esta publicação?')) return;
+  await remove(ref(db,'posts/'+id));
+};
+
 window.fecharReacModal=()=>$('reacModal').classList.remove('open');
 
 // ── PERFIL DE OUTRO USUÁRIO ───────────────────────
@@ -861,6 +876,37 @@ window.abrirFotoPost=id=>{
     if(el) el.scrollIntoView({behavior:'smooth',block:'center'});
   },300);
 };
+
+// ── PULL TO REFRESH ──────────────────────────────
+(function(){
+  let startY=0, pulling=false, threshold=80;
+  document.addEventListener('touchstart', e=>{
+    if(window.scrollY===0) { startY=e.touches[0].clientY; pulling=true; }
+  },{passive:true});
+  document.addEventListener('touchmove', e=>{
+    if(!pulling) return;
+    const dist=e.touches[0].clientY - startY;
+    if(dist>20 && window.scrollY===0){
+      const ind=document.getElementById('ptrIndicator');
+      if(ind) ind.classList.add('show');
+    }
+  },{passive:true});
+  document.addEventListener('touchend', e=>{
+    if(!pulling) return;
+    pulling=false;
+    const dist=e.changedTouches[0].clientY - startY;
+    const ind=document.getElementById('ptrIndicator');
+    if(dist>threshold && window.scrollY===0){
+      if(ind){ document.getElementById('ptrText').textContent='Atualizando...'; }
+      // Força re-render do feed
+      setTimeout(()=>{
+        if(ind) ind.classList.remove('show');
+      }, 1000);
+    } else {
+      if(ind) ind.classList.remove('show');
+    }
+  },{passive:true});
+})();
 
 // ── INICIALIZAÇÃO ─────────────────────────────────
 onAuthStateChanged(auth, async u => {
