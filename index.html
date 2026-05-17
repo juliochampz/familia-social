@@ -957,16 +957,18 @@ window.enviarComentario=async id=>{
   const texto=el.value.trim();
   await push(ref(db,`posts/${id}/comentarios`),{texto,uid:user.uid,nome:userProfile?.nome||user.displayName||'Familiar',foto:userProfile?.foto||null,ts:Date.now()});
   el.value='';
-  // Notificar autor do post
-  const postSnap=await get(ref(db,`posts/${id}`));
-  const post=postSnap.val();
-  if(post?.autorUid){
-    criarNotificacao(post.autorUid,{
-      tipo:'comentario',
-      texto:`<b>${sanitize(userProfile?.nome||'Familiar')}</b> comentou: "${sanitize(texto.slice(0,40))}${texto.length>40?'…':''}"`,
-      postId:id
-    });
-  }
+  // Notificar autor em background
+  try{
+    const postSnap=await get(ref(db,`posts/${id}`));
+    const post=postSnap.val();
+    if(post?.autorUid){
+      criarNotificacao(post.autorUid,{
+        tipo:'comentario',
+        texto:`<b>${sanitize(userProfile?.nome||'Familiar')}</b> comentou: "${sanitize(texto.slice(0,40))}${texto.length>40?'…':''}"`,
+        postId:id
+      });
+    }
+  }catch(ne){console.warn('Notif comentário erro:',ne);}
 };
 window.excluirComentario=async(postId,comentId)=>{
   if(!confirm('Apagar este comentário?'))return;
@@ -1006,17 +1008,19 @@ window.publicar=async()=>{
     }
     const perfil=await getPerfil(user.uid);
     await push(ref(db,'posts'),{texto,foto:fotoUrl,autorUid:user.uid,autorNome:perfil.nome||user.displayName||'Familiar',autorFoto:perfil.foto||null,ts:Date.now()});
-    // Notificar todos os membros sobre novo post
-    const membrosSnap=await get(ref(db,'usuarios'));
-    membrosSnap.forEach(m=>{
-      criarNotificacao(m.key,{
-        tipo:'post',
-        texto:`<b>${sanitize(perfil.nome||'Familiar')}</b> fez uma nova publicação 📸`,
-        postId:''  // será preenchido depois se necessário
-      });
-    });
     fecharModal();
     btn.disabled=false;btn.textContent='Publicar 🦫';
+    // Notificar membros em background — fora do try/catch para não bloquear
+    try{
+      const membrosSnap=await get(ref(db,'usuarios'));
+      membrosSnap.forEach(m=>{
+        criarNotificacao(m.key,{
+          tipo:'post',
+          texto:`<b>${sanitize(perfil.nome||'Familiar')}</b> fez uma nova publicação 📸`,
+          postId:''
+        });
+      });
+    }catch(ne){console.warn('Notif erro (não crítico):',ne);}
   }catch(e){
     btn.disabled=false;btn.textContent='Publicar 🦫';
     const prog=$('uploadProgress');
