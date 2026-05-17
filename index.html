@@ -525,6 +525,11 @@ const fmtTempo=ts=>{if(!ts)return'';const d=new Date(ts),now=new Date(),diff=Mat
 const iniciais=nome=>(nome||'?').split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);
 const avatarEl=(nome,fotoUrl,cls='post-avatar')=>fotoUrl?`<div class="${cls}"><img src="${fotoUrl}" alt="${nome}"></div>`:`<div class="${cls}">${iniciais(nome)}</div>`;
 const sanitize=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;'); // 🔒 XSS fix
+// Permite apenas <b> nas notificações (texto gerado internamente, não por usuário)
+const sanitizeNotif=s=>{
+  const clean=sanitize(s);
+  return clean.replace(/&lt;b&gt;/g,'<b>').replace(/&lt;\/b&gt;/g,'</b>');
+};
 
 // AUTH
 window.switchTab=t=>{
@@ -622,7 +627,7 @@ function iniciarNotificacoes(){
       return`<div class="notif-item${n.lida?'':' nao-lida'}" onclick="clicarNotif('${n.id}','${n.postId||''}')">
         ${n.tipo==='reacao'?`<div style="position:relative">${av}<div style="position:absolute;bottom:-2px;right:-2px;font-size:14px">${n.emoji||'❤️'}</div></div>`:av}
         <div class="notif-body">
-          <div class="notif-text">${sanitize(n.texto||'')}</div>
+          <div class="notif-text">${sanitizeNotif(n.texto||'')}</div>
           <div class="notif-time">${fmtTempo(n.ts)}</div>
         </div>
       </div>`;
@@ -1010,8 +1015,14 @@ window.publicar=async()=>{
       });
     });
     fecharModal();
-  }catch(e){alert('Erro ao publicar. Tente novamente.');}
-  btn.disabled=false;btn.textContent='Publicar 🦫';
+    btn.disabled=false;btn.textContent='Publicar 🦫';
+  }catch(e){
+    btn.disabled=false;btn.textContent='Publicar 🦫';
+    const prog=$('uploadProgress');
+    if(prog)prog.classList.remove('show');
+    console.error('Erro ao publicar:',e);
+    alert('Erro ao publicar: '+(e.message||'Tente novamente.'));
+  }
 };
 
 // PERFIL
