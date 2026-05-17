@@ -69,10 +69,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--brown)
   display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;
   flex-shrink:0;overflow:hidden}
 .post-avatar img{width:100%;height:100%;object-fit:cover}
-/* ✅ MELHORIA 1: post-header clicável para ir ao perfil */
-.post-header-clickable{cursor:pointer;display:flex;align-items:center;gap:10px;flex:1;
-  border-radius:8px;transition:opacity .15s}
-.post-header-clickable:active{opacity:.7}
 .post-meta{flex:1}
 .post-name{font-size:14px;font-weight:600;color:var(--brown)}
 .post-time{font-size:11px;color:var(--gray);margin-top:1px}
@@ -95,6 +91,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--brown)
 .comment-bubble{background:#f5ede0;border-radius:12px;padding:6px 10px;flex:1}
 .comment-name{font-size:11px;font-weight:600;color:var(--brown);margin-bottom:2px}
 .comment-text{font-size:13px;color:var(--brown2)}
+/* Botão excluir comentário */
 .btn-del-comment{background:none;border:none;color:#ccc;font-size:13px;cursor:pointer;
   padding:2px 4px;flex-shrink:0;line-height:1;margin-top:4px;transition:color .15s;opacity:0}
 .comment:hover .btn-del-comment{opacity:1}
@@ -129,6 +126,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--brown)
 .upload-preview .remove-img{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.5);
   color:#fff;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;
   display:flex;align-items:center;justify-content:center;font-size:14px}
+
 textarea{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;
   font-size:14px;color:var(--brown);background:var(--cream);resize:none;
   font-family:'DM Sans',sans-serif;min-height:90px}
@@ -174,21 +172,7 @@ textarea:focus{outline:none;border-color:var(--accent)}
 .empty{text-align:center;padding:48px 20px;color:var(--gray)}
 .empty-icon{font-size:48px;margin-bottom:12px}
 .empty p{font-size:14px;line-height:1.5}
-
-/* ✅ Lightbox — visualização de foto em tela cheia */
-.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:600;
-  align-items:center;justify-content:center;flex-direction:column}
-.lightbox.open{display:flex}
-.lightbox-img{max-width:100%;max-height:90vh;object-fit:contain;border-radius:8px;
-  animation:lbIn .2s ease}
-@keyframes lbIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
-.lightbox-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);
-  border:none;color:#fff;font-size:22px;width:40px;height:40px;border-radius:50%;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  backdrop-filter:blur(4px);transition:background .2s}
-.lightbox-close:hover{background:rgba(255,255,255,.3)}
-.lightbox-caption{color:rgba(255,255,255,.7);font-size:13px;margin-top:12px;text-align:center;padding:0 20px}
-
+/* Stories */
 .stories-bar{display:flex;gap:12px;padding:14px 16px;overflow-x:auto;scrollbar-width:none;
   background:var(--white);border-bottom:1px solid var(--border)}
 .stories-bar::-webkit-scrollbar{display:none}
@@ -203,10 +187,7 @@ textarea:focus{outline:none;border-color:var(--accent)}
 .story-avatar img{width:100%;height:100%;object-fit:cover}
 .story-name{font-size:10px;color:var(--brown2);max-width:64px;text-align:center;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-/* Story viewer */
-.story-viewer{display:none;position:fixed;inset:0;background:#000;z-index:500;flex-direction:column;
-  user-select:none;-webkit-user-select:none}
+.story-viewer{display:none;position:fixed;inset:0;background:#000;z-index:500;flex-direction:column}
 .story-viewer.open{display:flex}
 .story-progress{display:flex;gap:3px;padding:10px 12px 6px;position:absolute;top:0;left:0;right:0;z-index:2}
 .story-prog-bar{height:3px;background:rgba(255,255,255,.35);border-radius:2px;flex:1;overflow:hidden}
@@ -219,24 +200,11 @@ textarea:focus{outline:none;border-color:var(--accent)}
 .story-top-time{color:rgba(255,255,255,.7);font-size:11px}
 .story-close{color:#fff;background:none;border:none;font-size:24px;cursor:pointer;padding:4px}
 .story-img{width:100%;height:100%;object-fit:contain}
-
-/* ✅ MELHORIA 2: Zonas de toque do story (sem z-index alto para não bloquear close/header) */
-.story-zones{position:absolute;inset:0;display:flex;z-index:1}
-.story-zone-prev{width:35%;height:100%;cursor:pointer}
-.story-zone-next{width:65%;height:100%;cursor:pointer}
-
-/* Indicador de pausa */
-.story-paused-indicator{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  background:rgba(0,0,0,.4);border-radius:50%;width:56px;height:56px;
-  display:flex;align-items:center;justify-content:center;z-index:3;
-  opacity:0;transition:opacity .2s;pointer-events:none}
-.story-paused-indicator.visible{opacity:1}
-.story-paused-indicator svg{width:28px;height:28px;fill:#fff}
-
+.story-tap-prev{position:absolute;left:0;top:0;width:35%;height:100%;z-index:1}
+.story-tap-next{position:absolute;right:0;top:0;width:65%;height:100%;z-index:1}
 .story-text-overlay{position:absolute;bottom:30px;left:16px;right:16px;z-index:2;
   color:#fff;font-size:15px;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,.8);
   background:rgba(0,0,0,.25);border-radius:12px;padding:10px 14px}
-
 /* Reações */
 .reacoes-wrap{position:relative;display:inline-flex;align-items:center}
 .reacoes-picker{display:none;position:absolute;bottom:36px;left:0;background:var(--white);
@@ -250,24 +218,6 @@ textarea:focus{outline:none;border-color:var(--accent)}
 .reacao-count{display:flex;align-items:center;gap:3px;background:var(--cream);
   border-radius:12px;padding:2px 8px;font-size:12px;cursor:pointer;border:1px solid var(--border)}
 .reacao-count.minha{border-color:var(--accent);background:#fff5ed}
-
-/* Toast de notificação (substitui alert()) */
-.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);
-  padding:10px 18px;border-radius:20px;font-size:13px;font-weight:500;color:#fff;
-  opacity:0;transition:all .3s;z-index:999;pointer-events:none;max-width:280px;text-align:center}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.success{background:#4A7C59}
-.toast.error{background:#C0392B}
-.toast.info{background:#3D2B1F}
-
-/* Botão carregar mais posts */
-.btn-load-more{display:block;width:calc(100% - 32px);margin:0 16px 16px;padding:12px;
-  background:var(--white);border:1.5px solid var(--border);border-radius:14px;
-  color:var(--brown2);font-size:13px;font-weight:600;cursor:pointer;text-align:center;
-  font-family:'DM Sans',sans-serif;transition:all .2s}
-.btn-load-more:hover{border-color:var(--accent);color:var(--accent)}
-.btn-load-more:disabled{opacity:.5;cursor:not-allowed}
-
 /* PTR */
 .ptr-indicator{position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(-60px);
   background:var(--brown);color:#fff;padding:8px 16px;border-radius:0 0 16px 16px;
@@ -275,6 +225,14 @@ textarea:focus{outline:none;border-color:var(--accent)}
 .ptr-indicator.show{transform:translateX(-50%) translateY(0)}
 .ptr-spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;
   border-radius:50%;animation:spin .7s linear infinite}
+/* Botão voltar ao topo */
+.btn-topo{position:fixed;bottom:86px;right:18px;width:42px;height:42px;border-radius:50%;
+  background:var(--brown);color:#fff;border:none;cursor:pointer;font-size:18px;
+  box-shadow:0 3px 12px rgba(61,43,31,.35);display:flex;align-items:center;justify-content:center;
+  z-index:98;opacity:0;transform:translateY(12px);transition:opacity .25s,transform .25s;
+  pointer-events:none}
+.btn-topo.visible{opacity:1;transform:translateY(0);pointer-events:all}
+.btn-topo:active{transform:scale(.92)}
 </style>
 </head>
 <body>
@@ -311,19 +269,9 @@ textarea:focus{outline:none;border-color:var(--accent)}
       <div class="avatar-sm" id="topAvatar" onclick="showPage('perfil')"></div>
     </div>
   </div>
-
   <div class="stories-bar" id="storiesBar">
     <div class="loading" style="padding:10px"><div class="spinner" style="width:20px;height:20px;margin:0"></div></div>
   </div>
-
-  <!-- ✅ Lightbox -->
-  <div class="lightbox" id="lightbox" onclick="if(event.target===this)fecharLightbox()">
-    <button class="lightbox-close" onclick="fecharLightbox()">✕</button>
-    <img class="lightbox-img" id="lightboxImg" src="" alt="">
-    <div class="lightbox-caption" id="lightboxCaption"></div>
-  </div>
-
-  <!-- Story Viewer -->
   <div class="story-viewer" id="storyViewer">
     <div class="story-progress" id="storyProgress"></div>
     <div class="story-top">
@@ -333,21 +281,11 @@ textarea:focus{outline:none;border-color:var(--accent)}
     </div>
     <img class="story-img" id="storyImg" src="">
     <div class="story-text-overlay" id="storyTextOverlay" style="display:none"></div>
-
-    <!-- ✅ MELHORIA 2: Zonas de toque separadas + indicador de pausa -->
-    <div class="story-zones">
-      <div class="story-zone-prev" id="storyZonePrev"></div>
-      <div class="story-zone-next" id="storyZoneNext"></div>
-    </div>
-    <div class="story-paused-indicator" id="storyPausedIndicator">
-      <svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-    </div>
+    <div class="story-tap-prev" onclick="prevStory()"></div>
+    <div class="story-tap-next" onclick="nextStory()"></div>
   </div>
-
-  <div class="toast" id="toast"></div>
   <div class="ptr-indicator" id="ptrIndicator"><div class="ptr-spinner"></div><span id="ptrText">Atualizando...</span></div>
   <div id="pageFeed" class="feed"><div class="loading"><div class="spinner"></div>Carregando...</div></div>
-
   <div id="pagePerfil" class="profile-page" style="display:none">
     <div class="profile-header">
       <div class="profile-avatar" id="profileAvatar" onclick="document.getElementById('avatarInput').click()"></div>
@@ -363,9 +301,8 @@ textarea:focus{outline:none;border-color:var(--accent)}
     </div>
     <div class="photos-grid" id="myPhotosGrid"></div>
   </div>
-
   <div id="pageUserPerfil" class="profile-page" style="display:none">
-    <button class="btn-outline" style="margin-bottom:12px" id="btnVoltarUserPerfil">← Voltar</button>
+    <button class="btn-outline" style="margin-bottom:12px" onclick="showPage('membros')">← Voltar</button>
     <div class="profile-header">
       <div class="profile-avatar" id="userPerfilAvatar"></div>
       <div class="profile-name" id="userPerfilName">—</div>
@@ -376,13 +313,11 @@ textarea:focus{outline:none;border-color:var(--accent)}
     </div>
     <div class="photos-grid" id="userPhotosGrid"></div>
   </div>
-
   <div id="pageMembros" class="members-page" style="display:none">
     <h3 style="font-family:'Playfair Display',serif;font-size:19px;color:var(--brown);margin-bottom:14px">Membros da família</h3>
     <div id="listaMembros"><div class="loading"><div class="spinner"></div></div></div>
     <button class="btn-outline" style="margin-top:8px" onclick="showPage('perfil')">← Voltar</button>
   </div>
-
   <div class="bottom-nav">
     <button class="nav-item active" id="navFeed" onclick="showPage('feed')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Feed
@@ -395,6 +330,9 @@ textarea:focus{outline:none;border-color:var(--accent)}
     </button>
   </div>
 </div>
+
+<!-- Botão voltar ao topo -->
+<button class="btn-topo" id="btnTopo" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Voltar ao topo">↑</button>
 
 <!-- MODAL NOVO POST -->
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)fecharModal()">
@@ -414,58 +352,40 @@ textarea:focus{outline:none;border-color:var(--accent)}
   </div>
 </div>
 
+
+
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import{
-  getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,
-  signOut,onAuthStateChanged,updateProfile,
-  browserLocalPersistence,setPersistence   // ✅ MELHORIA 3
-}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import{getDatabase,ref,push,set,get,remove,onValue,update,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,updateProfile,browserLocalPersistence,setPersistence}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import{getDatabase,ref,push,set,get,remove,onValue,query,orderByChild,limitToLast,update,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
 const CFG={apiKey:'AIzaSyC54FUgmARdcGjy1tOVNerFMPvcBL921MI',authDomain:'despesas-c2f24.firebaseapp.com',databaseURL:'https://despesas-c2f24-default-rtdb.firebaseio.com',projectId:'despesas-c2f24'};
-const CODIGO_CONVITE='FAMILIA2025';
+const CODIGO_CONVITE=atob('RkFNSUxJQTIwMjU='); // 🔒 ofuscado
 const CLOUD_NAME='du6dxasku';
 const UPLOAD_PRESET='familia_social';
 
-// ✅ MELHORIA: Toast amigável no lugar de alert()
-function showToast(msg,type='info',duration=3000){
-  const t=$('toast');
-  t.textContent=msg;t.className=`toast ${type}`;
-  t.classList.add('show');
-  clearTimeout(t._timer);
-  t._timer=setTimeout(()=>t.classList.remove('show'),duration);
-}
-
 async function uploadImagem(file){
-  // ✅ MELHORIA: validação de tipo e tamanho antes de enviar
-  const tiposPermitidos=['image/jpeg','image/png','image/webp','image/gif'];
-  if(!tiposPermitidos.includes(file.type))throw new Error('Formato não suportado. Use JPG, PNG ou WebP.');
-  if(file.size>10*1024*1024)throw new Error('Imagem muito grande. Máximo 10MB.');
   const fd=new FormData();
   fd.append('file',file);fd.append('upload_preset',UPLOAD_PRESET);fd.append('folder','familia_social');
   const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,{method:'POST',body:fd});
-  if(!res.ok)throw new Error('Falha na conexão com o servidor de imagens.');
   const data=await res.json();
-  if(!data.secure_url)throw new Error('Erro no upload da imagem.');
+  if(!data.secure_url) throw new Error('Erro no upload');
   return data.secure_url;
 }
 
 const app=initializeApp(CFG);
 const auth=getAuth(app);
 const db=getDatabase(app);
-
-// ✅ MELHORIA 3: Persistência LOCAL — usuário fica logado indefinidamente no dispositivo
+// 🔒 FIX: usuário permanece logado mesmo após fechar/reabrir o app
 setPersistence(auth,browserLocalPersistence).catch(console.error);
 
 let user=null,userProfile=null,fotoFile=null;
-// ✅ MELHORIA 1: rastrear de onde viemos para o botão voltar do perfil
-let userPerfilOrigin='feed';
 
 const $=id=>document.getElementById(id);
 const fmtTempo=ts=>{if(!ts)return'';const d=new Date(ts),now=new Date(),diff=Math.floor((now-d)/1000);if(diff<60)return'agora mesmo';if(diff<3600)return`${Math.floor(diff/60)}min`;if(diff<86400)return`${Math.floor(diff/3600)}h`;return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});};
 const iniciais=nome=>(nome||'?').split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);
 const avatarEl=(nome,fotoUrl,cls='post-avatar')=>fotoUrl?`<div class="${cls}"><img src="${fotoUrl}" alt="${nome}"></div>`:`<div class="${cls}">${iniciais(nome)}</div>`;
+const sanitize=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;'); // 🔒 XSS fix
 
 // AUTH
 window.switchTab=t=>{
@@ -475,14 +395,12 @@ window.switchTab=t=>{
   $('authErr').style.display='none';
 };
 function showErr(msg){$('authErr').textContent=msg;$('authErr').style.display='block';}
-
 window.fazerLogin=async()=>{
   const email=$('lEmail').value.trim(),senha=$('lSenha').value;
   if(!email||!senha){showErr('Preencha e-mail e senha');return;}
   try{await signInWithEmailAndPassword(auth,email,senha);}
   catch(e){showErr(e.code==='auth/user-not-found'||e.code==='auth/wrong-password'||e.code==='auth/invalid-credential'?'E-mail ou senha incorretos':'Erro ao entrar.');}
 };
-
 window.fazerCadastro=async()=>{
   const codigo=$('cCodigo').value.trim();
   if(codigo.toUpperCase()!==CODIGO_CONVITE.toUpperCase()){showErr('Código de convite inválido.');return;}
@@ -495,38 +413,18 @@ window.fazerCadastro=async()=>{
     await set(ref(db,`usuarios/${cred.user.uid}`),{nome,email,uid:cred.user.uid,entrou:Date.now()});
   }catch(e){showErr(e.code==='auth/email-already-in-use'?'Este e-mail já está cadastrado':'Erro ao criar conta.');}
 };
-
 window.sair=async()=>{if(confirm('Sair da família?'))await signOut(auth);};
 
 // NAVIGATION
 window.showPage=p=>{
-  ['Feed','Perfil','Membros','UserPerfil'].forEach(n=>$(('page'+n)).style.display='none');
-  const pageEl=$('page'+p.charAt(0).toUpperCase()+p.slice(1));
-  if(pageEl)pageEl.style.display='';
+  ['Feed','Perfil','Membros'].forEach(n=>$(('page'+n)).style.display='none');
+  if($('pageUserPerfil'))$('pageUserPerfil').style.display='none';
+  $('page'+p.charAt(0).toUpperCase()+p.slice(1)).style.display='';
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
   const navMap={feed:'navFeed',perfil:'navPerfil'};
   if(navMap[p])$(navMap[p]).classList.add('active');
   if(p==='perfil')renderPerfil();
   if(p==='membros')renderMembros();
-};
-
-// ✅ MELHORIA 1: ir ao perfil de outro usuário a partir do feed ou membros
-window.verPerfilUsuario=async(uid,origin='feed')=>{
-  userPerfilOrigin=origin;
-  // Configura botão voltar dinamicamente
-  $('btnVoltarUserPerfil').onclick=()=>showPage(userPerfilOrigin);
-  showPage('userPerfil');
-  const uSnap=await get(ref(db,`usuarios/${uid}`));
-  const u=uSnap.val()||{};
-  $('userPerfilAvatar').innerHTML=u.foto?`<img src="${u.foto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(iniciais(u.nome||'?'));
-  $('userPerfilName').textContent=u.nome||'—';
-  const postsSnap=await get(ref(db,'posts'));
-  let posts=0,likes=0,fotos=[];
-  postsSnap.forEach(c=>{const p=c.val();if(p.autorUid===uid){posts++;if(p.reacoes)likes+=Object.keys(p.reacoes).length;if(p.foto)fotos.push({id:c.key,...p});}});
-  fotos.sort((a,b)=>b.ts-a.ts);
-  $('userPerfilPosts').textContent=posts;$('userPerfilLikes').textContent=likes;
-  const grid=$('userPhotosGrid');
-  grid.innerHTML=fotos.length?fotos.map(p=>`<div class="photo-thumb" onclick="abrirFotoPost('${p.id}')"><img src="${p.foto}" loading="lazy"></div>`).join(''):'<div class="photos-empty">Nenhuma foto publicada ainda</div>';
 };
 
 // REAÇÕES
@@ -545,18 +443,22 @@ window.reagir=async(id,emoji)=>{
   closePicker(id);
   const r=ref(db,`posts/${id}/reacoes/${user.uid}`);
   const snap=await get(r);
-  if(snap.exists()&&snap.val().emoji===emoji)await set(r,null);
-  else await set(r,{emoji,uid:user.uid,nome:userProfile?.nome||user.displayName||'Familiar'});
-  // ✅ FIX: atualiza só a barra de reações sem re-renderizar o feed inteiro (evita o scroll pular)
+  const removendo=snap.exists()&&snap.val().emoji===emoji;
+  // Atualiza barra visualmente de imediato — sem esperar Firebase
   const postSnap=await get(ref(db,'posts/'+id));
   const postData={id,...(postSnap.val()||{})};
+  if(!postData.reacoes)postData.reacoes={};
+  if(removendo)delete postData.reacoes[user.uid];
+  else postData.reacoes[user.uid]={emoji,uid:user.uid,nome:userProfile?.nome||user.displayName||'Familiar'};
   const barEl=document.getElementById('rb-'+id);
   if(barEl)barEl.innerHTML=renderReacoesBar(postData);
+  // Persiste no Firebase
+  if(removendo)await set(r,null);
+  else await set(r,{emoji,uid:user.uid,nome:userProfile?.nome||user.displayName||'Familiar'});
 };
 
-// ─── STORIES ───
-let storiesData=[],storiesGrouped=[],currentGroupIdx=0,currentStoryIdx=0;
-let storyTimer=null,storyPaused=false,storyStartTime=0,storyElapsed=0;
+// STORIES
+let storiesData=[],storiesGrouped=[],currentGroupIdx=0,currentStoryIdx=0,storyTimer=null;
 const STORY_DURATION=5000;
 
 function renderStoriesBar(){
@@ -595,25 +497,17 @@ window.publicarStory=async e=>{
   try{
     const url=await uploadImagem(file);
     await push(ref(db,'stories'),{uid:user.uid,nome:userProfile?.nome||'Familiar',foto:userProfile?.foto||null,img:url,ts:Date.now()});
-  }catch(err){showToast(err.message||'Erro ao publicar story','error');}
+  }catch(err){alert('Erro ao publicar story');}
   e.target.value='';
 };
-
-window.abrirStory=gi=>{
-  currentGroupIdx=gi;currentStoryIdx=0;
-  $('storyViewer').classList.add('open');
-  mostrarStoryAtual();
-};
+window.abrirStory=gi=>{currentGroupIdx=gi;currentStoryIdx=0;$('storyViewer').classList.add('open');mostrarStoryAtual();};
 
 function mostrarStoryAtual(){
   clearTimeout(storyTimer);
-  storyPaused=false;storyElapsed=0;
-  $('storyPausedIndicator').classList.remove('visible');
   const grupo=storiesGrouped[currentGroupIdx];
   if(!grupo)return fecharStory();
   const story=grupo.stories[currentStoryIdx];
   if(!story)return fecharStory();
-  // Marcar como visto
   const vistos=JSON.parse(localStorage.getItem('storiesVistos')||'{}');
   vistos[story.id]=true;
   localStorage.setItem('storiesVistos',JSON.stringify(vistos));
@@ -621,182 +515,78 @@ function mostrarStoryAtual(){
   $('storyName').textContent=grupo.nome;
   $('storyTime').textContent=fmtTempo(story.ts);
   const av=$('storyAvatar');
-  av.innerHTML=grupo.foto?`<img src="${grupo.foto}">`:`<span style="color:#fff;font-weight:700">${iniciais(grupo.nome)}</span>`;
+  av.innerHTML=grupo.foto?`<img src="${grupo.foto}">`:'<span style="color:#fff;font-weight:700">'+iniciais(grupo.nome)+'</span>';
   if(story.texto){$('storyTextOverlay').textContent=story.texto;$('storyTextOverlay').style.display='';}
   else $('storyTextOverlay').style.display='none';
-  // Barras de progresso
   const bars=grupo.stories.map((_,i)=>`<div class="story-prog-bar"><div class="story-prog-fill" id="spf-${i}"></div></div>`).join('');
   $('storyProgress').innerHTML=bars;
   for(let i=0;i<currentStoryIdx;i++){const el=$('spf-'+i);if(el)el.style.width='100%';}
-  iniciarProgresso();
-}
-
-function iniciarProgresso(){
-  clearTimeout(storyTimer);
   const fill=$('spf-'+currentStoryIdx);
-  const remaining=STORY_DURATION-storyElapsed;
-  if(fill){
-    const pct=(storyElapsed/STORY_DURATION)*100;
-    fill.style.transition='none';fill.style.width=pct+'%';
-    setTimeout(()=>{fill.style.transitionDuration=remaining+'ms';fill.style.width='100%';},30);
-  }
-  storyStartTime=Date.now();
-  storyTimer=setTimeout(nextStory,remaining);
+  if(fill){setTimeout(()=>{fill.style.transitionDuration=STORY_DURATION+'ms';fill.style.width='100%';},50);}
+  storyTimer=setTimeout(nextStory,STORY_DURATION);
 }
+window.nextStory=()=>{const grupo=storiesGrouped[currentGroupIdx];if(!grupo)return fecharStory();if(currentStoryIdx<grupo.stories.length-1){currentStoryIdx++;mostrarStoryAtual();}else if(currentGroupIdx<storiesGrouped.length-1){currentGroupIdx++;currentStoryIdx=0;mostrarStoryAtual();}else fecharStory();};
+window.prevStory=()=>{if(currentStoryIdx>0){currentStoryIdx--;mostrarStoryAtual();}else if(currentGroupIdx>0){currentGroupIdx--;currentStoryIdx=0;mostrarStoryAtual();}};
+window.fecharStory=()=>{clearTimeout(storyTimer);$('storyViewer').classList.remove('open');renderStoriesBar();};
 
-function pausarStory(){
-  if(storyPaused)return;
-  storyPaused=true;
-  storyElapsed+=(Date.now()-storyStartTime);
-  clearTimeout(storyTimer);
-  // Congela a barra de progresso
-  const fill=$('spf-'+currentStoryIdx);
-  if(fill){
-    const computed=fill.getBoundingClientRect().width/fill.parentElement.getBoundingClientRect().width*100;
-    fill.style.transition='none';fill.style.width=computed+'%';
-  }
-  $('storyPausedIndicator').classList.add('visible');
-}
-
-function retomarStory(){
-  if(!storyPaused)return;
-  storyPaused=false;
-  $('storyPausedIndicator').classList.remove('visible');
-  iniciarProgresso();
-}
-
-// ✅ MELHORIA 2: navegação e pausa por toque/clique
-window.nextStory=()=>{
-  const grupo=storiesGrouped[currentGroupIdx];if(!grupo)return fecharStory();
-  if(currentStoryIdx<grupo.stories.length-1){currentStoryIdx++;}
-  else if(currentGroupIdx<storiesGrouped.length-1){currentGroupIdx++;currentStoryIdx=0;}
-  else{fecharStory();return;}
-  mostrarStoryAtual();
-};
-window.prevStory=()=>{
-  if(currentStoryIdx>0){currentStoryIdx--;}
-  else if(currentGroupIdx>0){currentGroupIdx--;currentStoryIdx=0;}
-  mostrarStoryAtual();
-};
-window.fecharStory=()=>{
-  clearTimeout(storyTimer);
-  $('storyViewer').classList.remove('open');
-  renderStoriesBar();
-};
-
-// Configurar zonas de toque do story
-(function setupStoryTouch(){
-  const prev=$('storyZonePrev');
-  const next=$('storyZoneNext');
-  let holdTimer=null;
-
-  function onHoldStart(e){
-    // Não pausa se clicar no X ou no header
-    if(e.target.closest('.story-close,.story-top'))return;
-    holdTimer=setTimeout(()=>pausarStory(),150);
-  }
-  function onHoldEnd(e){
-    clearTimeout(holdTimer);
-    retomarStory();
-  }
-
-  // Zona PREV: clique = anterior, segurar = pausa
-  prev.addEventListener('pointerdown',onHoldStart);
-  prev.addEventListener('pointerup',e=>{
-    clearTimeout(holdTimer);
-    if(storyPaused){retomarStory();}else{prevStory();}
-  });
-  prev.addEventListener('pointerleave',onHoldEnd);
-
-  // Zona NEXT: clique = próximo, segurar = pausa
-  next.addEventListener('pointerdown',onHoldStart);
-  next.addEventListener('pointerup',e=>{
-    clearTimeout(holdTimer);
-    if(storyPaused){retomarStory();}else{nextStory();}
-  });
-  next.addEventListener('pointerleave',onHoldEnd);
-})();
-
-// FEED com paginação
-const POSTS_POR_PAGINA=10;
-let todosOsPosts=[],postsExibidos=0,feedListenerAtivo=false;
-
+// FEED
+let feedListenerAtivo=false;
+let todosOsPosts=[];
 function renderFeed(){
   const feedEl=$('pageFeed');
   if(feedListenerAtivo)return;
   feedListenerAtivo=true;
   feedEl.innerHTML='<div class="loading"><div class="spinner"></div></div>';
   onValue(ref(db,'posts'),snap=>{
-    todosOsPosts=[];
-    snap.forEach(c=>{const v=c.val();if(v)todosOsPosts.push({id:c.key,...v});});
-    todosOsPosts.sort((a,b)=>(b.ts||0)-(a.ts||0));
-    postsExibidos=0;
-    if(!todosOsPosts.length){
+    const novosPosts=[];
+    snap.forEach(c=>{const v=c.val();if(v)novosPosts.push({id:c.key,...v});});
+    novosPosts.sort((a,b)=>(b.ts||0)-(a.ts||0));
+    if(!novosPosts.length){
       feedEl.innerHTML=`<div class="empty"><div class="empty-icon">🦫</div><p>Nenhuma publicação ainda.<br>Seja o primeiro a compartilhar!</p></div>`;
-      return;
+      todosOsPosts=[];return;
     }
-    feedEl.innerHTML='';
-    carregarMaisPosts();
+    // Só re-renderiza o feed completo se chegou post novo (evita scroll pular ao reagir)
+    const idsAntigos=new Set(todosOsPosts.map(p=>p.id));
+    const temPostNovo=novosPosts.some(p=>!idsAntigos.has(p.id));
+    todosOsPosts=novosPosts;
+    if(feedEl.innerHTML.includes('spinner')||temPostNovo){
+      // Primeiro carregamento ou post novo: renderiza tudo
+      feedEl.innerHTML=todosOsPosts.map(p=>renderPost(p)).join('');
+    } else {
+      // Só reações/comentários mudaram: atualiza só barras de reações
+      todosOsPosts.forEach(p=>{
+        const barEl=document.getElementById('rb-'+p.id);
+        if(barEl)barEl.innerHTML=renderReacoesBar(p);
+      });
+    }
   });
 }
-
-function carregarMaisPosts(){
-  const feedEl=$('pageFeed');
-  // Remove botão anterior se existir
-  const btnAnt=document.getElementById('btnLoadMore');
-  if(btnAnt)btnAnt.remove();
-  const lote=todosOsPosts.slice(postsExibidos,postsExibidos+POSTS_POR_PAGINA);
-  lote.forEach(p=>{
-    const div=document.createElement('div');
-    div.innerHTML=renderPost(p);
-    feedEl.appendChild(div.firstElementChild);
-  });
-  postsExibidos+=lote.length;
-  // Adiciona botão "Ver mais" se ainda há posts
-  if(postsExibidos<todosOsPosts.length){
-    const btn=document.createElement('button');
-    btn.id='btnLoadMore';
-    btn.className='btn-load-more';
-    btn.textContent=`Ver mais (${todosOsPosts.length-postsExibidos} restantes)`;
-    btn.onclick=()=>{btn.disabled=true;btn.textContent='Carregando...';carregarMaisPosts();};
-    feedEl.appendChild(btn);
-  }
-}
-window.carregarMaisPosts=carregarMaisPosts;
 
 function renderPost(p){
+  // Comentários com botão de excluir para o autor
   const commentsHtml=Object.entries(p.comentarios||{}).map(([cid,c])=>`
     <div class="comment" id="comment-${cid}">
       ${avatarEl(c.nome,c.foto,'comment-avatar')}
       <div class="comment-bubble">
-        <div class="comment-name">${c.nome}</div>
-        <div class="comment-text">${c.texto}</div>
+        <div class="comment-name">${sanitize(c.nome)}</div>
+        <div class="comment-text">${sanitize(c.texto)}</div>
       </div>
       ${c.uid===user?.uid?`<button class="btn-del-comment" title="Apagar comentário" onclick="excluirComentario('${p.id}','${cid}')">🗑️</button>`:''}
     </div>`).join('');
-  const imgHtml=p.foto?`<img class="post-img" src="${p.foto}" loading="lazy" alt="foto" onclick="abrirLightbox('${p.foto}','${(p.autorNome||'').replace(/'/g,"\\'")} • ${fmtTempo(p.ts)}')" style="cursor:zoom-in">`:'';
 
-  // ✅ MELHORIA 1: header do post clicável se não for o próprio usuário
-  const isOwn=p.autorUid===user?.uid;
-  const headerInner=`
-    ${avatarEl(p.autorNome,p.autorFoto)}
-    <div class="post-meta">
-      <div class="post-name">${p.autorNome||'Familiar'}</div>
-      <div class="post-time">${fmtTempo(p.ts)}</div>
-    </div>`;
-
-  const headerHtml=isOwn
-    ?`<div class="post-header-clickable" style="cursor:default">${headerInner}</div>`
-    :`<div class="post-header-clickable" onclick="verPerfilUsuario('${p.autorUid}','feed')" title="Ver perfil de ${p.autorNome}">${headerInner}</div>`;
-
+  const imgHtml=p.foto?`<img class="post-img" src="${p.foto}" loading="lazy" alt="foto">`:'';
   return`
   <div class="post-card" id="post-${p.id}">
     <div class="post-header">
-      ${headerHtml}
-      ${isOwn?`<button style="background:none;border:none;cursor:pointer;color:#ccc;font-size:16px;padding:4px" onclick="excluirPost('${p.id}')" title="Apagar publicação">🗑️</button>`:''}
+      ${avatarEl(p.autorNome,p.autorFoto)}
+      <div class="post-meta">
+        <div class="post-name">${sanitize(p.autorNome||'Familiar')}</div>
+        <div class="post-time">${fmtTempo(p.ts)}</div>
+      </div>
+      ${p.autorUid===user?.uid?`<button class="btn-delete-post" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:16px;padding:4px" onclick="excluirPost('${p.id}')" title="Apagar publicação">🗑️</button>`:''}
     </div>
     ${imgHtml}
-    ${p.texto?`<div class="post-body"><div class="post-text">${p.texto}</div></div>`:''}
+    ${p.texto?`<div class="post-body"><div class="post-text">${sanitize(p.texto)}</div></div>`:''}
     <div class="reacoes-bar" id="rb-${p.id}">${renderReacoesBar(p)}</div>
     <div class="post-actions">
       <div class="reacoes-wrap">
@@ -837,34 +627,32 @@ function renderPost(p){
 window.focarComentario=id=>{const el=$(`ci-${id}`);if(el){el.focus();el.scrollIntoView({behavior:'smooth',block:'center'});}};
 window.enviarComentario=async id=>{
   const el=$(`ci-${id}`);if(!el||!el.value.trim())return;
-  try{
-    await push(ref(db,`posts/${id}/comentarios`),{texto:el.value.trim(),uid:user.uid,nome:userProfile?.nome||user.displayName||'Familiar',foto:userProfile?.foto||null,ts:Date.now()});
-    el.value='';
-  }catch(e){showToast('Erro ao enviar comentário','error');}
+  await push(ref(db,`posts/${id}/comentarios`),{texto:el.value.trim(),uid:user.uid,nome:userProfile?.nome||user.displayName||'Familiar',foto:userProfile?.foto||null,ts:Date.now()});
+  el.value='';
 };
 window.excluirComentario=async(postId,comentId)=>{
   if(!confirm('Apagar este comentário?'))return;
-  try{await remove(ref(db,`posts/${postId}/comentarios/${comentId}`));showToast('Comentário apagado','info');}
-  catch(e){showToast('Erro ao apagar comentário','error');}
+  await remove(ref(db,`posts/${postId}/comentarios/${comentId}`));
 };
-window.excluirPost=async id=>{
-  if(!confirm('Apagar esta publicação?'))return;
-  try{await remove(ref(db,'posts/'+id));showToast('Publicação apagada','info');}
-  catch(e){showToast('Erro ao apagar publicação','error');}
-};
+window.excluirPost=async id=>{if(!confirm('Apagar esta publicação?'))return;await remove(ref(db,'posts/'+id));};
 
 // MODAL NOVO POST
 window.abrirModal=()=>{$('modalOverlay').classList.add('open');$('postTexto').focus();};
 window.fecharModal=()=>{$('modalOverlay').classList.remove('open');fotoFile=null;$('uploadPreview').style.display='none';$('uploadArea').style.display='';$('postTexto').value='';$('fotoInput').value='';};
 window.removerFoto=()=>{fotoFile=null;$('uploadPreview').style.display='none';$('uploadArea').style.display='';$('fotoInput').value='';};
+
 window.previewFoto=e=>{
-  fotoFile=e.target.files[0];if(!fotoFile)return;
+  fotoFile=e.target.files[0];
+  if(!fotoFile)return;
   const url=URL.createObjectURL(fotoFile);
-  $('previewImg').src=url;$('uploadPreview').style.display='';$('uploadArea').style.display='none';
+  $('previewImg').src=url;
+  $('uploadPreview').style.display='';
+  $('uploadArea').style.display='none';
 };
+
 window.publicar=async()=>{
   const texto=$('postTexto').value.trim();
-  if(!texto&&!fotoFile){showToast('Adicione uma foto ou texto.','info');return;}
+  if(!texto&&!fotoFile){alert('Adicione uma foto ou texto.');return;}
   const btn=$('btnPost');btn.disabled=true;btn.textContent='Publicando...';
   try{
     let fotoUrl=null;
@@ -872,12 +660,12 @@ window.publicar=async()=>{
     const snap=await get(ref(db,`usuarios/${user.uid}`));
     const perfil=snap.val()||{};
     await push(ref(db,'posts'),{texto,foto:fotoUrl,autorUid:user.uid,autorNome:perfil.nome||user.displayName||'Familiar',autorFoto:perfil.foto||null,ts:Date.now()});
-    fecharModal();showToast('Publicado com sucesso! 🦫','success');
-  }catch(e){showToast(e.message||'Erro ao publicar. Tente novamente.','error');}
+    fecharModal();
+  }catch(e){alert('Erro ao publicar. Tente novamente.');}
   btn.disabled=false;btn.textContent='Publicar 🦫';
 };
 
-// PERFIL PRÓPRIO
+// PERFIL
 async function renderPerfil(){
   const snap=await get(ref(db,`usuarios/${user.uid}`));
   const p=snap.val()||{};
@@ -896,8 +684,8 @@ async function renderPerfil(){
 }
 window.uploadAvatar=async e=>{
   const file=e.target.files[0];if(!file)return;
-  try{const url=await uploadImagem(file);await update(ref(db,`usuarios/${user.uid}`),{foto:url});userProfile={...userProfile,foto:url};$('profileAvatar').innerHTML=`<img src="${url}">`;$('topAvatar').innerHTML=`<img src="${url}">`;showToast('Foto atualizada!','success');}
-  catch(e){showToast(e.message||'Erro ao enviar foto.','error');}
+  try{const url=await uploadImagem(file);await update(ref(db,`usuarios/${user.uid}`),{foto:url});userProfile={...userProfile,foto:url};$('profileAvatar').innerHTML=`<img src="${url}">`;$('topAvatar').innerHTML=`<img src="${url}">`;}
+  catch(e){alert('Erro ao enviar foto.');}
 };
 
 // MEMBROS
@@ -906,40 +694,46 @@ async function renderMembros(){
   const el=$('listaMembros');el.innerHTML='';
   snap.forEach(c=>{
     const m=c.val(),uid=c.key;
-    el.innerHTML+=`<div class="member-card" style="cursor:pointer" onclick="verPerfilUsuario('${uid}','membros')">
+    el.innerHTML+=`<div class="member-card" style="cursor:pointer" onclick="verPerfilUsuario('${uid}')">
       ${avatarEl(m.nome,m.foto)}
-      <div class="member-info"><div class="member-name">${m.nome}</div><div class="member-email">${m.email}</div></div>
+      <div class="member-info"><div class="member-name">${sanitize(m.nome)}</div><div class="member-email">${sanitize(m.email||"")}</div></div>
       <span style="color:var(--gray);font-size:18px">›</span>
     </div>`;
   });
 }
+
+window.verPerfilUsuario=async uid=>{
+  document.querySelectorAll('.page,.profile-page').forEach(p=>p.style.display='none');
+  const pgUp=$('pageUserPerfil');pgUp.style.display='';
+  const uSnap=await get(ref(db,`usuarios/${uid}`));
+  const u=uSnap.val()||{};
+  $('userPerfilAvatar').innerHTML=u.foto?`<img src="${u.foto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(iniciais(u.nome||'?'));
+  $('userPerfilName').textContent=sanitize(u.nome||'—');
+  const postsSnap=await get(ref(db,'posts'));
+  let posts=0,likes=0,fotos=[];
+  postsSnap.forEach(c=>{const p=c.val();if(p.autorUid===uid){posts++;if(p.reacoes)likes+=Object.keys(p.reacoes).length;if(p.foto)fotos.push({id:c.key,...p});}});
+  fotos.sort((a,b)=>b.ts-a.ts);
+  $('userPerfilPosts').textContent=posts;$('userPerfilLikes').textContent=likes;
+  const grid=$('userPhotosGrid');
+  grid.innerHTML=fotos.length?fotos.map(p=>`<div class="photo-thumb" onclick="abrirFotoPost('${p.id}')"><img src="${p.foto}" loading="lazy"></div>`).join(''):'<div class="photos-empty">Nenhuma foto publicada ainda</div>';
+};
 
 window.abrirFotoPost=id=>{
   showPage('feed');
   setTimeout(()=>{const el=document.getElementById('post-'+id);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},300);
 };
 
-// ✅ Lightbox
-window.abrirLightbox=(src,caption)=>{
-  $('lightboxImg').src=src;
-  $('lightboxCaption').textContent=caption||'';
-  $('lightbox').classList.add('open');
-  document.body.style.overflow='hidden';
-};
-window.fecharLightbox=()=>{
-  $('lightbox').classList.remove('open');
-  $('lightboxImg').src='';
-  document.body.style.overflow='';
-};
-// Fechar lightbox com tecla ESC
-document.addEventListener('keydown',e=>{if(e.key==='Escape')fecharLightbox();});
-
-// PTR
+// PTR + botão topo
 (function(){
   let startY=0,pulling=false;
   document.addEventListener('touchstart',e=>{if(window.scrollY===0){startY=e.touches[0].clientY;pulling=true;}},{passive:true});
   document.addEventListener('touchmove',e=>{if(!pulling)return;if(e.touches[0].clientY-startY>20&&window.scrollY===0){const ind=$('ptrIndicator');if(ind)ind.classList.add('show');}},{passive:true});
   document.addEventListener('touchend',e=>{if(!pulling)return;pulling=false;const ind=$('ptrIndicator');if(ind)setTimeout(()=>ind.classList.remove('show'),1000);},{passive:true});
+  // Botão topo: aparece após rolar 300px
+  window.addEventListener('scroll',()=>{
+    const btn=$('btnTopo');
+    if(btn)btn.classList.toggle('visible',window.scrollY>300);
+  },{passive:true});
 })();
 
 // INIT
@@ -956,7 +750,6 @@ onAuthStateChanged(auth,async u=>{
     user=null;userProfile=null;
     $('authScreen').style.display='flex';
     $('app').style.display='none';
-    feedListenerAtivo=false;
   }
 });
 </script>
