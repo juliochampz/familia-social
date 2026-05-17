@@ -302,7 +302,7 @@ textarea:focus{outline:none;border-color:var(--accent)}
     <div class="photos-grid" id="myPhotosGrid"></div>
   </div>
   <div id="pageUserPerfil" class="profile-page" style="display:none">
-    <button class="btn-outline" style="margin-bottom:12px" onclick="showPage('membros')">← Voltar</button>
+    <button class="btn-outline" style="margin-bottom:12px" id="btnVoltarPerfil" onclick="showPage(_perfilOrigin||'membros')">← Voltar</button>
     <div class="profile-header">
       <div class="profile-avatar" id="userPerfilAvatar"></div>
       <div class="profile-name" id="userPerfilName">—</div>
@@ -400,7 +400,7 @@ const db=getDatabase(app);
 // 🔒 FIX: usuário permanece logado mesmo após fechar/reabrir o app
 setPersistence(auth,browserLocalPersistence).catch(console.error);
 
-let user=null,userProfile=null,fotoFile=null;
+let user=null,userProfile=null,fotoFile=null,_perfilOrigin="feed";
 // P2: cache de perfis — evita buscar o mesmo usuário N vezes no Firebase
 const perfilCache={};
 async function getPerfil(uid){
@@ -615,10 +615,13 @@ function renderPost(p){
   return`
   <div class="post-card" id="post-${p.id}">
     <div class="post-header">
-      ${avatarEl(p.autorNome,p.autorFoto)}
-      <div class="post-meta">
-        <div class="post-name">${sanitize(p.autorNome||'Familiar')}</div>
-        <div class="post-time">${fmtTempo(p.ts)}</div>
+      <div style="display:flex;align-items:center;gap:10px;flex:1;${p.autorUid!==user?.uid?'cursor:pointer;':''}border-radius:8px;transition:opacity .15s"
+        ${p.autorUid!==user?.uid?`onclick="verPerfilUsuario('${p.autorUid}')" title="Ver perfil de ${sanitize(p.autorNome||'')}"`:''}>
+        ${avatarEl(p.autorNome,p.autorFoto)}
+        <div class="post-meta">
+          <div class="post-name">${sanitize(p.autorNome||'Familiar')}</div>
+          <div class="post-time">${fmtTempo(p.ts)}</div>
+        </div>
       </div>
       ${p.autorUid===user?.uid?`<button class="btn-delete-post" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:16px;padding:4px" onclick="excluirPost('${p.id}')" title="Apagar publicação">🗑️</button>`:''}
     </div>
@@ -726,19 +729,38 @@ window.uploadAvatar=async e=>{
 
 // MEMBROS
 async function renderMembros(){
-  const snap=await get(ref(db,'usuarios'));
-  const el=$('listaMembros');el.innerHTML='';
-  snap.forEach(c=>{
-    const m=c.val(),uid=c.key;
-    el.innerHTML+=`<div class="member-card" style="cursor:pointer" onclick="verPerfilUsuario('${uid}')">
-      ${avatarEl(m.nome,m.foto)}
-      <div class="member-info"><div class="member-name">${sanitize(m.nome)}</div><div class="member-email">${sanitize(m.email||"")}</div></div>
-      <span style="color:var(--gray);font-size:18px">›</span>
-    </div>`;
-  });
+  const el=$('listaMembros');
+  el.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  try{
+    const snap=await get(ref(db,'usuarios'));
+    if(!snap.exists()||!snap.hasChildren()){
+      el.innerHTML='<div class="empty" style="padding:24px"><p>Nenhum membro encontrado.<br><small>Verifique se os cadastros foram realizados.</small></p></div>';
+      return;
+    }
+    const cards=[];
+    snap.forEach(c=>{
+      const m=c.val(),uid=c.key;
+      if(!m||!m.nome)return; // ignora entradas inválidas
+      cards.push(`<div class="member-card" style="cursor:pointer" onclick="verPerfilUsuario('${uid}','membros')">
+        ${avatarEl(m.nome,m.foto)}
+        <div class="member-info">
+          <div class="member-name">${sanitize(m.nome)}</div>
+          <div class="member-email">${sanitize(m.email||'')}</div>
+        </div>
+        <span style="color:var(--gray);font-size:18px">›</span>
+      </div>`);
+    });
+    el.innerHTML=cards.length
+      ? cards.join('')
+      : '<div class="empty" style="padding:24px"><p>Nenhum membro encontrado.</p></div>';
+  }catch(err){
+    el.innerHTML='<div class="empty" style="padding:24px"><p>Erro ao carregar membros.<br>Verifique sua conexão.</p></div>';
+    console.error('renderMembros erro:',err);
+  }
 }
 
-window.verPerfilUsuario=async uid=>{
+window.verPerfilUsuario=async(uid,origin)=>{
+  _perfilOrigin=origin||_perfilOrigin||'feed';
   document.querySelectorAll('.page,.profile-page').forEach(p=>p.style.display='none');
   const pgUp=$('pageUserPerfil');pgUp.style.display='';
   const u=await getPerfil(uid);
