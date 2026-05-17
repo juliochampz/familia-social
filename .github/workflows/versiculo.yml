@@ -1,0 +1,28 @@
+name: Versículo do Dia
+
+on:
+  schedule:
+    # Roda todo dia às 08:00 horário de Brasília (11:00 UTC)
+    - cron: '0 11 * * *'
+  workflow_dispatch: # permite rodar manualmente pelo GitHub também
+
+jobs:
+  publicar-versiculo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalar dependências
+        run: npm install firebase-admin node-fetch
+
+      - name: Publicar versículo do dia
+        env:
+          FIREBASE_DATABASE_URL: ${{ secrets.FIREBASE_DATABASE_URL }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node versiculo.js
