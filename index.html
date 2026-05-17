@@ -244,6 +244,53 @@ textarea:focus{outline:none;border-color:var(--accent)}
   animation:slideDown .3s ease}
 .offline-banner.show{display:block}
 @keyframes slideDown{from{transform:translateY(-100%)}to{transform:translateY(0)}}
+/* ── NOTIFICAÇÕES ── */
+.notif-btn{position:relative;background:none;border:none;cursor:pointer;
+  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  color:var(--brown2);border-radius:50%;transition:background .15s}
+.notif-btn:active{background:var(--warm)}
+.notif-btn svg{width:22px;height:22px}
+.notif-badge{position:absolute;top:2px;right:2px;background:var(--red);color:#fff;
+  font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;padding:0 3px;
+  border:2px solid var(--white);display:none}
+.notif-badge.show{display:flex}
+.notif-panel{position:fixed;top:0;right:0;bottom:0;width:min(340px,100vw);
+  background:var(--white);box-shadow:-4px 0 24px rgba(0,0,0,.15);
+  z-index:300;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column}
+.notif-panel.open{transform:translateX(0)}
+.notif-panel-hdr{display:flex;align-items:center;justify-content:space-between;
+  padding:16px 18px;border-bottom:1px solid var(--border);flex-shrink:0}
+.notif-panel-hdr h3{font-family:'Playfair Display',serif;font-size:17px;color:var(--brown)}
+.notif-panel-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray)}
+.notif-panel-actions{display:flex;gap:8px;align-items:center}
+.notif-mark-all{font-size:11px;color:var(--accent);background:none;border:none;
+  cursor:pointer;font-weight:600;font-family:inherit;padding:4px 8px;border-radius:8px}
+.notif-mark-all:hover{background:var(--warm)}
+.notif-list{flex:1;overflow-y:auto;padding:8px 0}
+.notif-item{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;
+  cursor:pointer;transition:background .15s;border-bottom:1px solid var(--border);position:relative}
+.notif-item:hover{background:var(--warm)}
+.notif-item.nao-lida{background:#fff8f4}
+.notif-item.nao-lida::before{content:'';position:absolute;left:6px;top:50%;
+  transform:translateY(-50%);width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.notif-avatar{width:38px;height:38px;border-radius:50%;background:var(--accent2);
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;flex-shrink:0;overflow:hidden}
+.notif-avatar img{width:100%;height:100%;object-fit:cover}
+.notif-emoji{width:38px;height:38px;border-radius:50%;background:var(--cream);
+  display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.notif-body{flex:1;min-width:0}
+.notif-text{font-size:13px;color:var(--brown2);line-height:1.4}
+.notif-text b{color:var(--brown);font-weight:600}
+.notif-time{font-size:11px;color:var(--gray);margin-top:3px}
+.notif-empty{text-align:center;padding:48px 20px;color:var(--gray)}
+.notif-empty-icon{font-size:40px;margin-bottom:10px}
+.notif-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:299;
+  display:none;opacity:0;transition:opacity .28s}
+.notif-overlay.open{display:block;opacity:1}
+
 /* Botão voltar ao topo */
 .btn-topo{position:fixed;bottom:86px;left:16px;width:38px;height:38px;border-radius:50%;
   background:var(--brown);color:#fff;border:none;cursor:pointer;font-size:16px;
@@ -289,7 +336,28 @@ textarea:focus{outline:none;border-color:var(--accent)}
   <div class="topbar">
     <span class="topbar-title">🦫 Nossa Família</span>
     <div class="topbar-right">
+      <button class="notif-btn" id="notifBtn" onclick="abrirNotifPanel()" title="Notificações">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
+        </svg>
+        <span class="notif-badge" id="notifBadge"></span>
+      </button>
       <div class="avatar-sm" id="topAvatar" onclick="showPage('perfil')"></div>
+    </div>
+  </div>
+
+  <!-- Overlay e painel de notificações -->
+  <div class="notif-overlay" id="notifOverlay" onclick="fecharNotifPanel()"></div>
+  <div class="notif-panel" id="notifPanel">
+    <div class="notif-panel-hdr">
+      <h3>Notificações</h3>
+      <div class="notif-panel-actions">
+        <button class="notif-mark-all" onclick="marcarTodasLidas()">Marcar todas como lidas</button>
+        <button class="notif-panel-close" onclick="fecharNotifPanel()">✕</button>
+      </div>
+    </div>
+    <div class="notif-list" id="notifList">
+      <div class="notif-empty"><div class="notif-empty-icon">🔔</div><p>Nenhuma notificação ainda</p></div>
     </div>
   </div>
   <div class="stories-bar" id="storiesBar">
@@ -508,6 +576,91 @@ function renderReacoesBar(p){
     `<span class="reacao-count${emoji===minhaReacao?' minha':''}" onclick="reagir('${p.id}','${emoji}')">${emoji} ${n}</span>`
   ).join('');
 }
+// ── NOTIFICAÇÕES IN-APP ──────────────────────────────────────
+// Salva notificações no Firebase em /notificacoes/{uid}/
+// Cada item: {tipo, texto, autorNome, autorFoto, postId, ts, lida}
+
+async function criarNotificacao(destUid, dados){
+  // Não notifica a si mesmo
+  if(destUid===user?.uid)return;
+  try{
+    await push(ref(db,`notificacoes/${destUid}`),{
+      ...dados, ts:Date.now(), lida:false,
+      autorNome:userProfile?.nome||'Familiar',
+      autorFoto:userProfile?.foto||null,
+    });
+  }catch(e){console.error('notif erro:',e);}
+}
+
+let notifUnsub=null;
+function iniciarNotificacoes(){
+  if(!user)return;
+  if(notifUnsub)notifUnsub();
+  notifUnsub=onValue(ref(db,`notificacoes/${user.uid}`),snap=>{
+    const lista=[];
+    snap.forEach(c=>lista.push({id:c.key,...c.val()}));
+    lista.sort((a,b)=>(b.ts||0)-(a.ts||0));
+    const naoLidas=lista.filter(n=>!n.lida).length;
+    // Badge
+    const badge=$('notifBadge');
+    if(badge){
+      badge.textContent=naoLidas>9?'9+':naoLidas||'';
+      badge.classList.toggle('show',naoLidas>0);
+    }
+    // Lista no painel
+    const listEl=$('notifList');
+    if(!listEl)return;
+    if(!lista.length){
+      listEl.innerHTML='<div class="notif-empty"><div class="notif-empty-icon">🔔</div><p>Nenhuma notificação ainda</p></div>';
+      return;
+    }
+    listEl.innerHTML=lista.slice(0,50).map(n=>{
+      const av=n.autorFoto
+        ?`<div class="notif-avatar"><img src="${n.autorFoto}"></div>`
+        :`<div class="notif-avatar">${iniciais(n.autorNome||'?')}</div>`;
+      const emoji=n.tipo==='reacao'?`<div class="notif-emoji">${n.emoji||'❤️'}</div>`:av;
+      return`<div class="notif-item${n.lida?'':' nao-lida'}" onclick="clicarNotif('${n.id}','${n.postId||''}')">
+        ${n.tipo==='reacao'?`<div style="position:relative">${av}<div style="position:absolute;bottom:-2px;right:-2px;font-size:14px">${n.emoji||'❤️'}</div></div>`:av}
+        <div class="notif-body">
+          <div class="notif-text">${sanitize(n.texto||'')}</div>
+          <div class="notif-time">${fmtTempo(n.ts)}</div>
+        </div>
+      </div>`;
+    }).join('');
+  });
+}
+
+window.abrirNotifPanel=()=>{
+  $('notifPanel').classList.add('open');
+  $('notifOverlay').classList.add('open');
+  // Marcar como lidas após 2s de painel aberto
+  setTimeout(marcarTodasLidas, 2000);
+};
+window.fecharNotifPanel=()=>{
+  $('notifPanel').classList.remove('open');
+  $('notifOverlay').classList.remove('open');
+};
+window.marcarTodasLidas=async()=>{
+  if(!user)return;
+  const snap=await get(ref(db,`notificacoes/${user.uid}`));
+  const updates={};
+  snap.forEach(c=>{if(!c.val().lida)updates[`notificacoes/${user.uid}/${c.key}/lida`]=true;});
+  if(Object.keys(updates).length)await update(ref(db),updates);
+};
+window.clicarNotif=async(notifId,postId)=>{
+  // Marca como lida
+  if(user&&notifId)await update(ref(db,`notificacoes/${user.uid}/${notifId}`),{lida:true});
+  fecharNotifPanel();
+  // Navega para o post
+  if(postId){
+    showPage('feed');
+    setTimeout(()=>{
+      const el=document.getElementById('post-'+postId);
+      if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+    },400);
+  }
+};
+
 window.togglePicker=id=>{$('rp-'+id).classList.toggle('open');};
 window.closePicker=id=>{const el=$('rp-'+id);if(el)el.classList.remove('open');};
 window.reagir=async(id,emoji)=>{
@@ -524,8 +677,21 @@ window.reagir=async(id,emoji)=>{
   const barEl=document.getElementById('rb-'+id);
   if(barEl)barEl.innerHTML=renderReacoesBar(postData);
   // Persiste no Firebase
-  if(removendo)await set(r,null);
-  else await set(r,{emoji,uid:user.uid,nome:userProfile?.nome||user.displayName||'Familiar'});
+  if(removendo){
+    await set(r,null);
+  } else {
+    await set(r,{emoji,uid:user.uid,nome:userProfile?.nome||user.displayName||'Familiar'});
+    // Notificar autor do post sobre a reação
+    const postSnap2=await get(ref(db,`posts/${id}`));
+    const post2=postSnap2.val();
+    if(post2?.autorUid){
+      criarNotificacao(post2.autorUid,{
+        tipo:'reacao', emoji,
+        texto:`<b>${sanitize(userProfile?.nome||'Familiar')}</b> reagiu com ${emoji} na sua publicação`,
+        postId:id
+      });
+    }
+  }
 };
 
 // STORIES
@@ -750,8 +916,19 @@ function ativarListenersComentarios(){
 }
 window.enviarComentario=async id=>{
   const el=$(`ci-${id}`);if(!el||!el.value.trim())return;
-  await push(ref(db,`posts/${id}/comentarios`),{texto:el.value.trim(),uid:user.uid,nome:userProfile?.nome||user.displayName||'Familiar',foto:userProfile?.foto||null,ts:Date.now()});
+  const texto=el.value.trim();
+  await push(ref(db,`posts/${id}/comentarios`),{texto,uid:user.uid,nome:userProfile?.nome||user.displayName||'Familiar',foto:userProfile?.foto||null,ts:Date.now()});
   el.value='';
+  // Notificar autor do post
+  const postSnap=await get(ref(db,`posts/${id}`));
+  const post=postSnap.val();
+  if(post?.autorUid){
+    criarNotificacao(post.autorUid,{
+      tipo:'comentario',
+      texto:`<b>${sanitize(userProfile?.nome||'Familiar')}</b> comentou: "${sanitize(texto.slice(0,40))}${texto.length>40?'…':''}"`,
+      postId:id
+    });
+  }
 };
 window.excluirComentario=async(postId,comentId)=>{
   if(!confirm('Apagar este comentário?'))return;
@@ -791,6 +968,15 @@ window.publicar=async()=>{
     }
     const perfil=await getPerfil(user.uid);
     await push(ref(db,'posts'),{texto,foto:fotoUrl,autorUid:user.uid,autorNome:perfil.nome||user.displayName||'Familiar',autorFoto:perfil.foto||null,ts:Date.now()});
+    // Notificar todos os membros sobre novo post
+    const membrosSnap=await get(ref(db,'usuarios'));
+    membrosSnap.forEach(m=>{
+      criarNotificacao(m.key,{
+        tipo:'post',
+        texto:`<b>${sanitize(perfil.nome||'Familiar')}</b> fez uma nova publicação 📸`,
+        postId:''  // será preenchido depois se necessário
+      });
+    });
     fecharModal();
   }catch(e){alert('Erro ao publicar. Tente novamente.');}
   btn.disabled=false;btn.textContent='Publicar 🦫';
@@ -923,7 +1109,7 @@ onAuthStateChanged(auth,async u=>{
     $('topAvatar').innerHTML=userProfile.foto?`<img src="${userProfile.foto}">`:(iniciais(userProfile.nome));
     $('authScreen').style.display='none';
     $('app').style.display='block';
-    renderFeed();renderStoriesBar();
+    renderFeed();renderStoriesBar();iniciarNotificacoes();
   }else{
     user=null;userProfile=null;
     $('authScreen').style.display='flex';
