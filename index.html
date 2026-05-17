@@ -46,6 +46,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--brown)
 .auth-err{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 12px;
   font-size:13px;color:var(--red);margin-bottom:14px;display:none}
 #app{display:none;min-height:100vh;padding-bottom:70px}
+#loadingScreen{position:fixed;inset:0;background:linear-gradient(145deg,#3D2B1F 0%,#6B4C3B 50%,#C8763A 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:999}
+#loadingScreen .ls-icon{font-size:52px}
+#loadingScreen .ls-spin{width:28px;height:28px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
 .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:12px 18px;
   display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
 .topbar-title{font-family:'Playfair Display',serif;font-size:20px;color:var(--brown);font-weight:700}
@@ -136,6 +139,10 @@ textarea:focus{outline:none;border-color:var(--accent)}
   font-family:'DM Sans',sans-serif;transition:background .2s}
 .btn-post:hover{background:var(--accent)}
 .btn-post:disabled{opacity:.5;cursor:not-allowed}
+.upload-progress{width:100%;height:4px;background:var(--border);border-radius:4px;
+  overflow:hidden;margin-top:8px;display:none}
+.upload-progress-bar{height:100%;background:var(--accent);width:0%;transition:width .2s;border-radius:4px}
+.upload-progress.show{display:block}
 .profile-page{padding:16px;max-width:500px;margin:0 auto}
 .profile-header{background:var(--card);border-radius:20px;padding:24px;text-align:center;
   margin-bottom:16px;border:1px solid var(--border);box-shadow:0 2px 12px var(--shadow)}
@@ -199,6 +206,10 @@ textarea:focus{outline:none;border-color:var(--accent)}
 .story-top-name{color:#fff;font-size:14px;font-weight:600;flex:1}
 .story-top-time{color:rgba(255,255,255,.7);font-size:11px}
 .story-close{color:#fff;background:none;border:none;font-size:24px;cursor:pointer;padding:4px}
+.story-del{color:rgba(255,255,255,.7);background:rgba(255,0,0,.25);border:none;font-size:13px;
+  font-weight:600;cursor:pointer;padding:5px 10px;border-radius:8px;font-family:inherit;
+  transition:background .15s}
+.story-del:hover{background:rgba(255,0,0,.5)}
 .story-img{width:100%;height:100%;object-fit:contain}
 .story-tap-prev{position:absolute;left:0;top:0;width:35%;height:100%;z-index:1}
 .story-tap-next{position:absolute;right:0;top:0;width:65%;height:100%;z-index:1}
@@ -225,6 +236,12 @@ textarea:focus{outline:none;border-color:var(--accent)}
 .ptr-indicator.show{transform:translateX(-50%) translateY(0)}
 .ptr-spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;
   border-radius:50%;animation:spin .7s linear infinite}
+/* Offline banner */
+.offline-banner{display:none;position:fixed;top:0;left:0;right:0;background:#C0392B;color:#fff;
+  text-align:center;padding:8px 16px;font-size:13px;font-weight:600;z-index:200;
+  animation:slideDown .3s ease}
+.offline-banner.show{display:block}
+@keyframes slideDown{from{transform:translateY(-100%)}to{transform:translateY(0)}}
 /* Botão voltar ao topo */
 .btn-topo{position:fixed;bottom:86px;left:16px;width:38px;height:38px;border-radius:50%;
   background:var(--brown);color:#fff;border:none;cursor:pointer;font-size:16px;
@@ -237,7 +254,11 @@ textarea:focus{outline:none;border-color:var(--accent)}
 </head>
 <body>
 
-<div id="authScreen">
+<div id="loadingScreen">
+  <div class="ls-icon">🦫</div>
+  <div class="ls-spin"></div>
+</div>
+<div id="authScreen" style="display:none">
   <div class="auth-card">
     <div class="auth-logo"><div class="icon">🦫</div><h1>Nossa Família</h1><p>Um espaço só nosso</p></div>
     <div class="auth-tabs">
@@ -277,6 +298,7 @@ textarea:focus{outline:none;border-color:var(--accent)}
     <div class="story-top">
       <div class="story-top-avatar" id="storyAvatar"></div>
       <div style="flex:1"><div class="story-top-name" id="storyName"></div><div class="story-top-time" id="storyTime"></div></div>
+      <button class="story-del" id="btnDeletarStory" style="display:none" onclick="deletarStoryAtual()">🗑️</button>
       <button class="story-close" onclick="fecharStory()">✕</button>
     </div>
     <img class="story-img" id="storyImg" src="">
@@ -284,6 +306,7 @@ textarea:focus{outline:none;border-color:var(--accent)}
     <div class="story-tap-prev" onclick="prevStory()"></div>
     <div class="story-tap-next" onclick="nextStory()"></div>
   </div>
+  <div class="offline-banner" id="offlineBanner">📡 Sem conexão — algumas funções podem não funcionar</div>
   <div class="ptr-indicator" id="ptrIndicator"><div class="ptr-spinner"></div><span id="ptrText">Atualizando...</span></div>
   <div id="pageFeed" class="feed"><div class="loading"><div class="spinner"></div>Carregando...</div></div>
   <div id="pagePerfil" class="profile-page" style="display:none">
@@ -348,6 +371,7 @@ textarea:focus{outline:none;border-color:var(--accent)}
     </div>
     <input type="file" id="fotoInput" accept="image/*" style="display:none" onchange="previewFoto(event)">
     <textarea id="postTexto" placeholder="O que você quer compartilhar com a família? 🦫"></textarea>
+    <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadProgressBar"></div></div>
     <button class="btn-post" id="btnPost" onclick="publicar()">Publicar 🦫</button>
   </div>
 </div>
@@ -382,16 +406,31 @@ async function comprimirImagem(file, maxW=1280, qualidade=0.82){
   });
 }
 
-async function uploadImagem(file){
+async function uploadImagem(file, onProgress){
   // Comprime antes de enviar (exceto GIFs animados)
   const paraComprimir=['image/jpeg','image/png','image/webp'];
   const fileParaEnviar=paraComprimir.includes(file.type)?await comprimirImagem(file):file;
   const fd=new FormData();
   fd.append('file',fileParaEnviar);fd.append('upload_preset',UPLOAD_PRESET);fd.append('folder','familia_social');
-  const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,{method:'POST',body:fd});
-  const data=await res.json();
-  if(!data.secure_url) throw new Error('Erro no upload');
-  return data.secure_url;
+  // P3: usar XHR para acompanhar progresso real
+  return new Promise((resolve,reject)=>{
+    const xhr=new XMLHttpRequest();
+    xhr.open('POST',`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`);
+    if(onProgress){
+      xhr.upload.onprogress=e=>{
+        if(e.lengthComputable)onProgress(Math.round(e.loaded/e.total*100));
+      };
+    }
+    xhr.onload=()=>{
+      try{
+        const data=JSON.parse(xhr.responseText);
+        if(data.secure_url)resolve(data.secure_url);
+        else reject(new Error('Erro no upload'));
+      }catch(e){reject(e);}
+    };
+    xhr.onerror=()=>reject(new Error('Falha na conexão'));
+    xhr.send(fd);
+  });
 }
 
 const app=initializeApp(CFG);
@@ -544,6 +583,10 @@ function mostrarStoryAtual(){
   $('storyImg').src=story.img||'';
   $('storyName').textContent=grupo.nome;
   $('storyTime').textContent=fmtTempo(story.ts);
+  // Mostrar botão deletar só para stories próprios
+  const btnDel=$('btnDeletarStory');
+  if(btnDel)btnDel.style.display=grupo.uid===user?.uid?'':'none';
+  if(btnDel)btnDel.dataset.storyId=story.id;
   const av=$('storyAvatar');
   av.innerHTML=grupo.foto?`<img src="${grupo.foto}">`:'<span style="color:#fff;font-weight:700">'+iniciais(grupo.nome)+'</span>';
   if(story.texto){$('storyTextOverlay').textContent=story.texto;$('storyTextOverlay').style.display='';}
@@ -558,10 +601,20 @@ function mostrarStoryAtual(){
 window.nextStory=()=>{const grupo=storiesGrouped[currentGroupIdx];if(!grupo)return fecharStory();if(currentStoryIdx<grupo.stories.length-1){currentStoryIdx++;mostrarStoryAtual();}else if(currentGroupIdx<storiesGrouped.length-1){currentGroupIdx++;currentStoryIdx=0;mostrarStoryAtual();}else fecharStory();};
 window.prevStory=()=>{if(currentStoryIdx>0){currentStoryIdx--;mostrarStoryAtual();}else if(currentGroupIdx>0){currentGroupIdx--;currentStoryIdx=0;mostrarStoryAtual();}};
 window.fecharStory=()=>{clearTimeout(storyTimer);$('storyViewer').classList.remove('open');renderStoriesBar();};
+window.deletarStoryAtual=async()=>{
+  const btn=$('btnDeletarStory');
+  if(!btn||!btn.dataset.storyId)return;
+  if(!confirm('Apagar este story?'))return;
+  const id=btn.dataset.storyId;
+  fecharStory();
+  try{await remove(ref(db,'stories/'+id));}
+  catch(e){console.error('Erro ao deletar story:',e);}
+};
 
 // FEED
 let feedListenerAtivo=false;
 let todosOsPosts=[];
+const comentListeners={}; // P3: listeners em tempo real por post
 function renderFeed(){
   const feedEl=$('pageFeed');
   if(feedListenerAtivo)return;
@@ -583,6 +636,8 @@ function renderFeed(){
     todosOsPosts=novosPosts;
     if(feedEl.innerHTML.includes('spinner')||temPostNovo||temPostDeletado){
       feedEl.innerHTML=todosOsPosts.map(p=>renderPost(p)).join('');
+    // P3: ativar listeners de comentários em tempo real
+    ativarListenersComentarios();
     } else {
       // Só reações/comentários: atualiza só o necessário sem tocar no scroll
       todosOsPosts.forEach(p=>{
@@ -615,8 +670,7 @@ function renderPost(p){
   return`
   <div class="post-card" id="post-${p.id}">
     <div class="post-header">
-      <div style="display:flex;align-items:center;gap:10px;flex:1;${p.autorUid!==user?.uid?'cursor:pointer;':''}border-radius:8px;transition:opacity .15s"
-        ${p.autorUid!==user?.uid?`onclick="verPerfilUsuario('${p.autorUid}')" title="Ver perfil de ${sanitize(p.autorNome||'')}"`:''}>
+      <div class="post-author-link" data-uid="${p.autorUid}" data-own="${p.autorUid===user?.uid}" style="display:flex;align-items:center;gap:10px;flex:1;${p.autorUid!==user?.uid?'cursor:pointer;':''}border-radius:8px;transition:opacity .15s">
         ${avatarEl(p.autorNome,p.autorFoto)}
         <div class="post-meta">
           <div class="post-name">${sanitize(p.autorNome||'Familiar')}</div>
@@ -665,6 +719,33 @@ function renderPost(p){
 }
 
 window.focarComentario=id=>{const el=$(`ci-${id}`);if(el){el.focus();el.scrollIntoView({behavior:'smooth',block:'center'});}};
+
+function ativarListenersComentarios(){
+  // Cancela listeners anteriores
+  Object.values(comentListeners).forEach(unsub=>{ try{unsub();}catch(e){} });
+  Object.keys(comentListeners).forEach(k=>delete comentListeners[k]);
+  // Cria novo listener por post visível
+  todosOsPosts.forEach(p=>{
+    comentListeners[p.id]=onValue(ref(db,`posts/${p.id}/comentarios`),snap=>{
+      const el=document.getElementById('comments-'+p.id);
+      if(!el)return;
+      const comentarios={};
+      snap.forEach(c=>{comentarios[c.key]=c.val();});
+      el.innerHTML=Object.entries(comentarios).map(([cid,c])=>`
+        <div class="comment" id="comment-${cid}">
+          ${avatarEl(c.nome,c.foto,'comment-avatar')}
+          <div class="comment-bubble">
+            <div class="comment-name">${sanitize(c.nome)}</div>
+            <div class="comment-text">${sanitize(c.texto)}</div>
+          </div>
+          ${c.uid===user?.uid?`<button class="btn-del-comment" onclick="excluirComentario('${p.id}','${cid}')">🗑️</button>`:''}
+        </div>`).join('');
+      // Atualizar contador
+      const btn=document.querySelector(`#post-${p.id} .btn-action:last-child`);
+      if(btn){const n=Object.keys(comentarios).length;btn.childNodes[btn.childNodes.length-1].textContent=n||'';}
+    });
+  });
+}
 window.enviarComentario=async id=>{
   const el=$(`ci-${id}`);if(!el||!el.value.trim())return;
   await push(ref(db,`posts/${id}/comentarios`),{texto:el.value.trim(),uid:user.uid,nome:userProfile?.nome||user.displayName||'Familiar',foto:userProfile?.foto||null,ts:Date.now()});
@@ -696,7 +777,16 @@ window.publicar=async()=>{
   const btn=$('btnPost');btn.disabled=true;btn.textContent='Publicando...';
   try{
     let fotoUrl=null;
-    if(fotoFile)fotoUrl=await uploadImagem(fotoFile);
+    if(fotoFile){
+      const prog=$('uploadProgress'),bar=$('uploadProgressBar');
+      if(prog)prog.classList.add('show');
+      fotoUrl=await uploadImagem(fotoFile,pct=>{
+        if(bar)bar.style.width=pct+'%';
+        if(btn)btn.textContent=`Enviando ${pct}%...`;
+      });
+      if(prog)prog.classList.remove('show');
+      if(bar)bar.style.width='0%';
+    }
     const perfil=await getPerfil(user.uid);
     await push(ref(db,'posts'),{texto,foto:fotoUrl,autorUid:user.uid,autorNome:perfil.nome||user.displayName||'Familiar',autorFoto:perfil.foto||null,ts:Date.now()});
     fecharModal();
@@ -761,7 +851,10 @@ async function renderMembros(){
 
 window.verPerfilUsuario=async(uid,origin)=>{
   _perfilOrigin=origin||_perfilOrigin||'feed';
-  document.querySelectorAll('.page,.profile-page').forEach(p=>p.style.display='none');
+  // Usar showPage para consistência — só adicionar userPerfil ao sistema
+  ['Feed','Perfil','Membros'].forEach(n=>$(('page'+n)).style.display='none');
+  if($('pageUserPerfil'))$('pageUserPerfil').style.display='none';
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
   const pgUp=$('pageUserPerfil');pgUp.style.display='';
   const u=await getPerfil(uid);
   $('userPerfilAvatar').innerHTML=u.foto?`<img src="${u.foto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(iniciais(u.nome||'?'));
@@ -780,6 +873,28 @@ window.abrirFotoPost=id=>{
   setTimeout(()=>{const el=document.getElementById('post-'+id);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},300);
 };
 
+// Event delegation: clique no header do post → perfil do autor
+document.addEventListener('click',e=>{
+  const el=e.target.closest('.post-author-link');
+  if(!el)return;
+  const uid=el.dataset.uid;
+  const own=el.dataset.own==='true';
+  if(uid&&!own)verPerfilUsuario(uid,'feed');
+});
+
+// Offline mode
+(function(){
+  function atualizarOffline(){
+    const banner=$('offlineBanner');
+    if(!banner)return;
+    if(navigator.onLine)banner.classList.remove('show');
+    else banner.classList.add('show');
+  }
+  window.addEventListener('online',atualizarOffline);
+  window.addEventListener('offline',atualizarOffline);
+  atualizarOffline(); // checar estado inicial
+})();
+
 // PTR + botão topo
 (function(){
   let startY=0,pulling=false;
@@ -795,6 +910,9 @@ window.abrirFotoPost=id=>{
 
 // INIT
 onAuthStateChanged(auth,async u=>{
+  // Esconde loading screen assim que Firebase responde
+  const ls=$('loadingScreen');
+  if(ls)ls.style.display='none';
   if(u){
     user=u;
     const snap=await get(ref(db,`usuarios/${u.uid}`));
