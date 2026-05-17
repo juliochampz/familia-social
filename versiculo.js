@@ -297,7 +297,7 @@ async function publicarVersiculo() {
   // Capitalizar primeira letra do dia da semana
   const dataCapitalizada = dataFormatada.charAt(0).toUpperCase() + dataFormatada.slice(1);
 
-  const texto = `📖 *Versículo do Dia* — ${dataCapitalizada}\n\n"${versiculo.texto}"\n\n— ${versiculo.ref}`;
+  const texto = `📖 Versículo do Dia — ${dataCapitalizada}\n\n${versiculo.texto}\n\n— ${versiculo.ref}\n\n🙏 ${versiculo.tema}`;
 
   // Verificar se já foi publicado hoje (evita duplicatas se rodar duas vezes)
   const hoje = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
@@ -316,7 +316,7 @@ async function publicarVersiculo() {
     texto,
     foto: null,
     autorUid: 'sistema',
-    autorNome: '🦫 Nossa Família',
+    autorNome: '📖 Palavra do Dia',
     autorFoto: null,
     ts: Date.now(),
     isVersiculo: true,
