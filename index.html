@@ -609,7 +609,7 @@ function iniciarNotificacoes(){
     // Badge
     const badge=$('notifBadge');
     if(badge){
-      badge.textContent=naoLidas>9?'9+':naoLidas||'';
+      badge.textContent=naoLidas>9?'9+':(naoLidas>0?String(naoLidas):'');
       badge.classList.toggle('show',naoLidas>0);
     }
     // Lista no painel
@@ -617,6 +617,7 @@ function iniciarNotificacoes(){
     if(!listEl)return;
     if(!lista.length){
       listEl.innerHTML='<div class="notif-empty"><div class="notif-empty-icon">🔔</div><p>Nenhuma notificação ainda</p></div>';
+      // Badge já foi atualizado acima
       return;
     }
     listEl.innerHTML=lista.slice(0,50).map(n=>{
@@ -638,8 +639,8 @@ function iniciarNotificacoes(){
 window.abrirNotifPanel=()=>{
   $('notifPanel').classList.add('open');
   $('notifOverlay').classList.add('open');
-  // Marcar como lidas após 2s de painel aberto
-  setTimeout(marcarTodasLidas, 2000);
+  // Marcar como lidas após 3s de painel aberto
+  setTimeout(marcarTodasLidas, 3000);
 };
 window.fecharNotifPanel=()=>{
   $('notifPanel').classList.remove('open');
