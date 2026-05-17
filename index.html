@@ -226,13 +226,13 @@ textarea:focus{outline:none;border-color:var(--accent)}
 .ptr-spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;
   border-radius:50%;animation:spin .7s linear infinite}
 /* Botão voltar ao topo */
-.btn-topo{position:fixed;bottom:86px;right:18px;width:42px;height:42px;border-radius:50%;
-  background:var(--brown);color:#fff;border:none;cursor:pointer;font-size:18px;
-  box-shadow:0 3px 12px rgba(61,43,31,.35);display:flex;align-items:center;justify-content:center;
-  z-index:98;opacity:0;transform:translateY(12px);transition:opacity .25s,transform .25s;
-  pointer-events:none}
-.btn-topo.visible{opacity:1;transform:translateY(0);pointer-events:all}
-.btn-topo:active{transform:scale(.92)}
+.btn-topo{position:fixed;bottom:86px;left:16px;width:38px;height:38px;border-radius:50%;
+  background:var(--brown);color:#fff;border:none;cursor:pointer;font-size:16px;
+  box-shadow:0 3px 12px rgba(61,43,31,.3);display:flex;align-items:center;justify-content:center;
+  z-index:98;opacity:0;transform:translateY(10px) scale(.9);
+  transition:opacity .2s,transform .2s;pointer-events:none}
+.btn-topo.visible{opacity:1;transform:translateY(0) scale(1);pointer-events:all}
+.btn-topo:active{transform:scale(.88)}
 </style>
 </head>
 <body>
@@ -364,9 +364,30 @@ const CODIGO_CONVITE=atob('RkFNSUxJQTIwMjU='); // 🔒 ofuscado
 const CLOUD_NAME='du6dxasku';
 const UPLOAD_PRESET='familia_social';
 
+// P2: comprime imagem via Canvas antes de enviar — reduz tamanho em ~80%
+async function comprimirImagem(file, maxW=1280, qualidade=0.82){
+  return new Promise((resolve)=>{
+    const img=new Image();
+    const url=URL.createObjectURL(file);
+    img.onload=()=>{
+      URL.revokeObjectURL(url);
+      const ratio=Math.min(1, maxW/Math.max(img.width,img.height));
+      const w=Math.round(img.width*ratio), h=Math.round(img.height*ratio);
+      const canvas=document.createElement('canvas');
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      canvas.toBlob(blob=>resolve(new File([blob],'foto.jpg',{type:'image/jpeg'})),'image/jpeg',qualidade);
+    };
+    img.src=url;
+  });
+}
+
 async function uploadImagem(file){
+  // Comprime antes de enviar (exceto GIFs animados)
+  const paraComprimir=['image/jpeg','image/png','image/webp'];
+  const fileParaEnviar=paraComprimir.includes(file.type)?await comprimirImagem(file):file;
   const fd=new FormData();
-  fd.append('file',file);fd.append('upload_preset',UPLOAD_PRESET);fd.append('folder','familia_social');
+  fd.append('file',fileParaEnviar);fd.append('upload_preset',UPLOAD_PRESET);fd.append('folder','familia_social');
   const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,{method:'POST',body:fd});
   const data=await res.json();
   if(!data.secure_url) throw new Error('Erro no upload');
@@ -380,6 +401,15 @@ const db=getDatabase(app);
 setPersistence(auth,browserLocalPersistence).catch(console.error);
 
 let user=null,userProfile=null,fotoFile=null;
+// P2: cache de perfis — evita buscar o mesmo usuário N vezes no Firebase
+const perfilCache={};
+async function getPerfil(uid){
+  if(perfilCache[uid])return perfilCache[uid];
+  const snap=await get(ref(db,`usuarios/${uid}`));
+  const p=snap.val()||{};
+  perfilCache[uid]=p;
+  return p;
+}
 
 const $=id=>document.getElementById(id);
 const fmtTempo=ts=>{if(!ts)return'';const d=new Date(ts),now=new Date(),diff=Math.floor((now-d)/1000);if(diff<60)return'agora mesmo';if(diff<3600)return`${Math.floor(diff/60)}min`;if(diff<86400)return`${Math.floor(diff/3600)}h`;return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});};
@@ -545,18 +575,25 @@ function renderFeed(){
       feedEl.innerHTML=`<div class="empty"><div class="empty-icon">🦫</div><p>Nenhuma publicação ainda.<br>Seja o primeiro a compartilhar!</p></div>`;
       todosOsPosts=[];return;
     }
-    // Só re-renderiza o feed completo se chegou post novo (evita scroll pular ao reagir)
     const idsAntigos=new Set(todosOsPosts.map(p=>p.id));
+    // P2: detecta posts deletados também
+    const idsNovos=new Set(novosPosts.map(p=>p.id));
     const temPostNovo=novosPosts.some(p=>!idsAntigos.has(p.id));
+    const temPostDeletado=todosOsPosts.some(p=>!idsNovos.has(p.id));
     todosOsPosts=novosPosts;
-    if(feedEl.innerHTML.includes('spinner')||temPostNovo){
-      // Primeiro carregamento ou post novo: renderiza tudo
+    if(feedEl.innerHTML.includes('spinner')||temPostNovo||temPostDeletado){
       feedEl.innerHTML=todosOsPosts.map(p=>renderPost(p)).join('');
     } else {
-      // Só reações/comentários mudaram: atualiza só barras de reações
+      // Só reações/comentários: atualiza só o necessário sem tocar no scroll
       todosOsPosts.forEach(p=>{
         const barEl=document.getElementById('rb-'+p.id);
         if(barEl)barEl.innerHTML=renderReacoesBar(p);
+        // P2: atualiza contador de comentários também
+        const btnComent=document.querySelector(`#post-${p.id} .btn-action:last-child`);
+        if(btnComent){
+          const n=Object.keys(p.comentarios||{}).length;
+          btnComent.childNodes[btnComent.childNodes.length-1].textContent=n||'';
+        }
       });
     }
   });
@@ -611,7 +648,7 @@ function renderPost(p){
         ${Object.keys(p.comentarios||{}).length||''}
       </button>
     </div>
-    <div class="comments-section">
+    <div class="comments-section" data-postid="${p.id}">
       <div id="comments-${p.id}">${commentsHtml}</div>
       <div class="comment-input-row">
         ${avatarEl(userProfile?.nome||'',userProfile?.foto||'','comment-avatar')}
@@ -657,8 +694,7 @@ window.publicar=async()=>{
   try{
     let fotoUrl=null;
     if(fotoFile)fotoUrl=await uploadImagem(fotoFile);
-    const snap=await get(ref(db,`usuarios/${user.uid}`));
-    const perfil=snap.val()||{};
+    const perfil=await getPerfil(user.uid);
     await push(ref(db,'posts'),{texto,foto:fotoUrl,autorUid:user.uid,autorNome:perfil.nome||user.displayName||'Familiar',autorFoto:perfil.foto||null,ts:Date.now()});
     fecharModal();
   }catch(e){alert('Erro ao publicar. Tente novamente.');}
@@ -684,7 +720,7 @@ async function renderPerfil(){
 }
 window.uploadAvatar=async e=>{
   const file=e.target.files[0];if(!file)return;
-  try{const url=await uploadImagem(file);await update(ref(db,`usuarios/${user.uid}`),{foto:url});userProfile={...userProfile,foto:url};$('profileAvatar').innerHTML=`<img src="${url}">`;$('topAvatar').innerHTML=`<img src="${url}">`;}
+  try{const url=await uploadImagem(file);await update(ref(db,`usuarios/${user.uid}`),{foto:url});userProfile={...userProfile,foto:url};perfilCache[user.uid]={...perfilCache[user.uid],foto:url};$('profileAvatar').innerHTML=`<img src="${url}">`;$('topAvatar').innerHTML=`<img src="${url}">`;}
   catch(e){alert('Erro ao enviar foto.');}
 };
 
@@ -705,8 +741,7 @@ async function renderMembros(){
 window.verPerfilUsuario=async uid=>{
   document.querySelectorAll('.page,.profile-page').forEach(p=>p.style.display='none');
   const pgUp=$('pageUserPerfil');pgUp.style.display='';
-  const uSnap=await get(ref(db,`usuarios/${uid}`));
-  const u=uSnap.val()||{};
+  const u=await getPerfil(uid);
   $('userPerfilAvatar').innerHTML=u.foto?`<img src="${u.foto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(iniciais(u.nome||'?'));
   $('userPerfilName').textContent=sanitize(u.nome||'—');
   const postsSnap=await get(ref(db,'posts'));
