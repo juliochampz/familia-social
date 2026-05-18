@@ -604,6 +604,14 @@ function iniciarNotificacoes(){
   // onValue já entrega dados existentes + novos em tempo real
   notifUnsub=onValue(ref(db,`notificacoes/${user.uid}`),snap=>{
     const lista=[];
+    if(!snap.exists()){
+      // Sem notificações ainda — limpar badge
+      const badge=$('notifBadge');
+      if(badge){badge.textContent='';badge.classList.remove('show');}
+      const listEl=$('notifList');
+      if(listEl)listEl.innerHTML='<div class="notif-empty"><div class="notif-empty-icon">🔔</div><p>Nenhuma notificação ainda</p></div>';
+      return;
+    }
     snap.forEach(c=>lista.push({id:c.key,...c.val()}));
     lista.sort((a,b)=>(b.ts||0)-(a.ts||0));
     const naoLidas=lista.filter(n=>!n.lida).length;
@@ -693,9 +701,10 @@ window.reagir=async(id,emoji)=>{
     const post2=postSnap2.val();
     if(post2?.autorUid){
       criarNotificacao(post2.autorUid,{
-        tipo:'reacao', emoji,
+        tipo:'reacao',
+        emoji,
         texto:`<b>${sanitize(userProfile?.nome||'Familiar')}</b> reagiu com ${emoji} na sua publicação`,
-        postId:id
+        postId:String(id)
       });
     }
   }
@@ -1040,7 +1049,14 @@ async function renderPerfil(){
   $('profileAvatar').innerHTML=p.foto?`<img src="${p.foto}">`:(iniciais(p.nome||'?'));
   const postsSnap=await get(ref(db,'posts'));
   let myPosts=0,myLikes=0;
-  postsSnap.forEach(c=>{const post=c.val();if(post.autorUid===user.uid){myPosts++;if(post.curtidas)myLikes+=Object.keys(post.curtidas).length;}});
+  postsSnap.forEach(c=>{
+    const post=c.val();
+    if(post.autorUid===user.uid){
+      myPosts++;
+      // Conta reações recebidas (campo correto é 'reacoes', não 'curtidas')
+      if(post.reacoes)myLikes+=Object.keys(post.reacoes).length;
+    }
+  });
   $('statPosts').textContent=myPosts;$('statLikes').textContent=myLikes;
   const myPhotos=[];
   postsSnap.forEach(c=>{const post=c.val();if(post.autorUid===user.uid&&post.foto)myPhotos.push({id:c.key,...post});});
@@ -1067,12 +1083,15 @@ async function renderMembros(){
     const cards=[];
     snap.forEach(c=>{
       const m=c.val(),uid=c.key;
-      if(!m||!m.nome)return; // ignora entradas inválidas
+      if(!m)return;
+      // aceita qualquer entrada com pelo menos uid — nome pode vir do displayName
+      const nome=m.nome||m.displayName||'Familiar';
+      const email=m.email||'';
       cards.push(`<div class="member-card" style="cursor:pointer" onclick="verPerfilUsuario('${uid}','membros')">
-        ${avatarEl(m.nome,m.foto)}
+        ${avatarEl(nome,m.foto)}
         <div class="member-info">
-          <div class="member-name">${sanitize(m.nome)}</div>
-          <div class="member-email">${sanitize(m.email||'')}</div>
+          <div class="member-name">${sanitize(nome)}</div>
+          <div class="member-email">${sanitize(email)}</div>
         </div>
         <span style="color:var(--gray);font-size:18px">›</span>
       </div>`);
