@@ -605,6 +605,7 @@ function iniciarNotificacoes(){
   notifUnsub=onValue(ref(db,`notificacoes/${user.uid}`),snap=>{
     const lista=[];
     if(!snap.exists()){
+      console.log('[Notif] Nenhuma notificação no banco');
       // Sem notificações ainda — limpar badge
       const badge=$('notifBadge');
       if(badge){badge.textContent='';badge.classList.remove('show');}
@@ -615,9 +616,9 @@ function iniciarNotificacoes(){
     snap.forEach(c=>lista.push({id:c.key,...c.val()}));
     lista.sort((a,b)=>(b.ts||0)-(a.ts||0));
     const naoLidas=lista.filter(n=>!n.lida).length;
-    // Badge
     const badge=$('notifBadge');
     if(badge){
+      badge.style.width='';badge.style.height='';badge.style.minWidth='';
       badge.textContent=naoLidas>9?'9+':(naoLidas>0?String(naoLidas):'');
       badge.classList.toggle('show',naoLidas>0);
     }
@@ -696,17 +697,20 @@ window.reagir=async(id,emoji)=>{
     await set(r,null);
   } else {
     await set(r,{emoji,uid:user.uid,nome:userProfile?.nome||user.displayName||'Familiar'});
-    // Notificar autor do post sobre a reação
-    const postSnap2=await get(ref(db,`posts/${id}`));
-    const post2=postSnap2.val();
-    if(post2?.autorUid){
-      criarNotificacao(post2.autorUid,{
-        tipo:'reacao',
-        emoji,
-        texto:`<b>${sanitize(userProfile?.nome||'Familiar')}</b> reagiu com ${emoji} na sua publicação`,
-        postId:String(id)
-      });
-    }
+    // Notificar autor do post sobre a reação (em background)
+    try{
+      const postSnap2=await get(ref(db,`posts/${id}`));
+      const post2=postSnap2.val();
+      if(post2?.autorUid && post2.autorUid!=='sistema'){
+        await criarNotificacao(post2.autorUid,{
+          tipo:'reacao',
+          emoji,
+          texto:`<b>${sanitize(userProfile?.nome||'Familiar')}</b> reagiu com ${emoji} na sua publicação`,
+          postId:String(id)
+        });
+        console.log('[Notif] Reação enviada para',post2.autorUid);
+      }
+    }catch(ne){console.warn('[Notif] Erro reação:',ne);}
   }
 };
 
@@ -1077,7 +1081,7 @@ async function renderMembros(){
   try{
     const snap=await get(ref(db,'usuarios'));
     if(!snap.exists()||!snap.hasChildren()){
-      el.innerHTML='<div class="empty" style="padding:24px"><p>Nenhum membro encontrado.<br><small>Verifique se os cadastros foram realizados.</small></p></div>';
+      el.innerHTML='<div class="empty" style="padding:24px"><p>Nenhum membro encontrado.</p></div>';
       return;
     }
     const cards=[];
