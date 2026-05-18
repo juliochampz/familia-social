@@ -213,9 +213,25 @@ textarea:focus{outline:none;border-color:var(--accent)}
 .story-img{width:100%;height:100%;object-fit:contain}
 .story-tap-prev{position:absolute;left:0;top:0;width:35%;height:100%;z-index:1}
 .story-tap-next{position:absolute;right:0;top:0;width:65%;height:100%;z-index:1}
-.story-text-overlay{position:absolute;bottom:30px;left:16px;right:16px;z-index:2;
+.story-text-overlay{position:absolute;bottom:80px;left:16px;right:16px;z-index:2;
   color:#fff;font-size:15px;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,.8);
   background:rgba(0,0,0,.25);border-radius:12px;padding:10px 14px}
+/* Reações no story */
+.story-reacoes{position:absolute;bottom:16px;left:0;right:0;z-index:3;
+  display:flex;align-items:center;justify-content:center;gap:6px;padding:0 16px}
+.story-reacao-btn{font-size:28px;background:rgba(255,255,255,.15);border:none;
+  border-radius:50%;width:48px;height:48px;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;transition:transform .15s,background .15s;
+  backdrop-filter:blur(4px);line-height:1}
+.story-reacao-btn:active{transform:scale(1.3);background:rgba(255,255,255,.3)}
+.story-reacao-btn.minha{background:rgba(255,255,255,.35);box-shadow:0 0 0 2px #fff}
+/* Contador flutuante ao reagir */
+.story-reacao-float{position:absolute;font-size:32px;pointer-events:none;
+  animation:floatUp .8s ease forwards;z-index:10}
+@keyframes floatUp{
+  0%{opacity:1;transform:translateY(0) scale(1)}
+  100%{opacity:0;transform:translateY(-80px) scale(1.5)}
+}
 /* Reações */
 .reacoes-wrap{position:relative;display:inline-flex;align-items:center}
 .reacoes-picker{display:none;position:absolute;bottom:40px;left:0;background:var(--white);
@@ -375,6 +391,15 @@ textarea:focus{outline:none;border-color:var(--accent)}
     <div class="story-text-overlay" id="storyTextOverlay" style="display:none"></div>
     <div class="story-tap-prev" onclick="prevStory()"></div>
     <div class="story-tap-next" onclick="nextStory()"></div>
+    <!-- Reações do story -->
+    <div class="story-reacoes" id="storyReacoes">
+      <button class="story-reacao-btn" onclick="reagirStory('❤️')">❤️</button>
+      <button class="story-reacao-btn" onclick="reagirStory('😂')">😂</button>
+      <button class="story-reacao-btn" onclick="reagirStory('😮')">😮</button>
+      <button class="story-reacao-btn" onclick="reagirStory('🔥')">🔥</button>
+      <button class="story-reacao-btn" onclick="reagirStory('👏')">👏</button>
+      <button class="story-reacao-btn" onclick="reagirStory('🦫')">🦫</button>
+    </div>
   </div>
   <div class="offline-banner" id="offlineBanner">📡 Sem conexão — algumas funções podem não funcionar</div>
   <div class="ptr-indicator" id="ptrIndicator"><div class="ptr-spinner"></div><span id="ptrText">Atualizando...</span></div>
@@ -598,15 +623,9 @@ async function criarNotificacao(destUid, dados){
 }
 
 let notifUnsub=null;
-function iniciarNotificacoes(){
-  if(!user)return;
-  if(notifUnsub)notifUnsub();
-  // onValue já entrega dados existentes + novos em tempo real
-  notifUnsub=onValue(ref(db,`notificacoes/${user.uid}`),snap=>{
+function processarNotificacoes(snap){
     const lista=[];
     if(!snap.exists()){
-      console.log('[Notif] Nenhuma notificação no banco');
-      // Sem notificações ainda — limpar badge
       const badge=$('notifBadge');
       if(badge){badge.textContent='';badge.classList.remove('show');}
       const listEl=$('notifList');
@@ -644,7 +663,13 @@ function iniciarNotificacoes(){
         </div>
       </div>`;
     }).join('');
-  });
+  // fim do snap handler
+}
+
+function iniciarNotificacoes(){
+  if(!user)return;
+  if(notifUnsub)notifUnsub();
+  notifUnsub=onValue(ref(db,`notificacoes/${user.uid}`),processarNotificacoes);
 }
 
 window.abrirNotifPanel=()=>{
@@ -785,10 +810,65 @@ function mostrarStoryAtual(){
   const fill=$('spf-'+currentStoryIdx);
   if(fill){setTimeout(()=>{fill.style.transitionDuration=STORY_DURATION+'ms';fill.style.width='100%';},50);}
   storyTimer=setTimeout(nextStory,STORY_DURATION);
+  // Atualizar botões de reação para este story
+  atualizarBotoesReacaoStory(story.id);
 }
 window.nextStory=()=>{const grupo=storiesGrouped[currentGroupIdx];if(!grupo)return fecharStory();if(currentStoryIdx<grupo.stories.length-1){currentStoryIdx++;mostrarStoryAtual();}else if(currentGroupIdx<storiesGrouped.length-1){currentGroupIdx++;currentStoryIdx=0;mostrarStoryAtual();}else fecharStory();};
 window.prevStory=()=>{if(currentStoryIdx>0){currentStoryIdx--;mostrarStoryAtual();}else if(currentGroupIdx>0){currentGroupIdx--;currentStoryIdx=0;mostrarStoryAtual();}};
 window.fecharStory=()=>{clearTimeout(storyTimer);$('storyViewer').classList.remove('open');renderStoriesBar();};
+
+window.reagirStory=async(emoji)=>{
+  const grupo=storiesGrouped[currentGroupIdx];
+  const story=grupo?.stories[currentStoryIdx];
+  if(!story)return;
+
+  // Animação flutuante
+  const viewer=$('storyViewer');
+  const float=document.createElement('div');
+  float.className='story-reacao-float';
+  float.textContent=emoji;
+  float.style.cssText=`left:${Math.random()*60+20}%;bottom:80px`;
+  viewer.appendChild(float);
+  setTimeout(()=>float.remove(),900);
+
+  // Salvar reação no Firebase em stories/{id}/reacoes/{uid}
+  const r=ref(db,`stories/${story.id}/reacoes/${user.uid}`);
+  const snap=await get(r);
+  if(snap.exists()&&snap.val().emoji===emoji){
+    // Remover reação (toggle)
+    await set(r,null);
+  } else {
+    await set(r,{emoji,uid:user.uid,nome:userProfile?.nome||'Familiar',ts:Date.now()});
+    // Notificar dono do story
+    if(grupo.uid!==user.uid){
+      criarNotificacao(grupo.uid,{
+        tipo:'reacao_story',
+        emoji,
+        texto:`<b>${sanitize(userProfile?.nome||'Familiar')}</b> reagiu com ${emoji} no seu story`,
+        postId:story.id
+      });
+    }
+  }
+  // Atualizar visual dos botões
+  atualizarBotoesReacaoStory(story.id);
+};
+
+async function atualizarBotoesReacaoStory(storyId){
+  const snap=await get(ref(db,`stories/${storyId}/reacoes`));
+  const reacoes={};
+  if(snap.exists())snap.forEach(c=>{reacoes[c.key]=c.val();});
+  const minhaReacao=reacoes[user?.uid]?.emoji;
+  // Contar por emoji
+  const counts={};
+  Object.values(reacoes).forEach(r=>{counts[r.emoji]=(counts[r.emoji]||0)+1;});
+  // Atualizar botões
+  document.querySelectorAll('#storyReacoes .story-reacao-btn').forEach(btn=>{
+    const e=btn.textContent.trim();
+    const n=counts[e]||0;
+    btn.classList.toggle('minha',e===minhaReacao);
+    btn.innerHTML=n>0?`${e}<span style="font-size:11px;color:#fff;margin-left:2px">${n}</span>`:e;
+  });
+}
 window.deletarStoryAtual=async()=>{
   const btn=$('btnDeletarStory');
   if(!btn||!btn.dataset.storyId)return;
