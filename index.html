@@ -633,9 +633,10 @@ function iniciarNotificacoes(){
       const av=n.autorFoto
         ?`<div class="notif-avatar"><img src="${n.autorFoto}"></div>`
         :`<div class="notif-avatar">${iniciais(n.autorNome||'?')}</div>`;
-      const emoji=n.tipo==='reacao'?`<div class="notif-emoji">${n.emoji||'❤️'}</div>`:av;
       return`<div class="notif-item${n.lida?'':' nao-lida'}" onclick="clicarNotif('${n.id}','${n.postId||''}')">
-        ${n.tipo==='reacao'?`<div style="position:relative">${av}<div style="position:absolute;bottom:-2px;right:-2px;font-size:14px">${n.emoji||'❤️'}</div></div>`:av}
+        ${n.tipo==='reacao'
+          ?`<div style="position:relative;flex-shrink:0">${av}<div style="position:absolute;bottom:-2px;right:-2px;font-size:16px;line-height:1">${n.emoji||'❤️'}</div></div>`
+          :av}
         <div class="notif-body">
           <div class="notif-text">${sanitizeNotif(n.texto||'')}</div>
           <div class="notif-time">${fmtTempo(n.ts)}</div>
@@ -648,8 +649,7 @@ function iniciarNotificacoes(){
 window.abrirNotifPanel=()=>{
   $('notifPanel').classList.add('open');
   $('notifOverlay').classList.add('open');
-  // Marcar como lidas após 3s de painel aberto
-  setTimeout(marcarTodasLidas, 3000);
+  // NÃO marca automaticamente — usuário decide quando marcar
 };
 window.fecharNotifPanel=()=>{
   $('notifPanel').classList.remove('open');
